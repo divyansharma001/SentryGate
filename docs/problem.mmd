@@ -1,0 +1,30 @@
+%% SentryGate - THE PROBLEM. This is the money slide for Phase 1.
+%% Deliberately tiny: readable from the back of the room in 5 seconds.
+%% Render: make diagram
+flowchart LR
+    A["Attack<br/>'ignore previous instructions...'"]
+    V["Cheap mutation<br/>'Ignore ALL previous instructions...'<br/><i>casing / punctuation / filler</i>"]
+
+    CACHE{{"Semantic cache<br/>cosine similarity ≥ 0.85"}}
+    FILTER["Injection filter<br/>deberta-v3<br/><b>scores 1.000 INJECTION</b>"]
+    LLM[LLM]
+    POISON[("Poisoned entry<br/>SYSTEM PROMPT: ...<br/>API key: sk-live-...")]
+
+    A --> FILTER
+    FILTER -->|BLOCKED| X["403"]
+
+    V --> CACHE
+    CACHE -->|"sim 0.99 = HIT"| POISON
+    POISON ==>|"served"| OUT["Attacker gets<br/>the secret"]
+    CACHE -.->|"miss only"| FILTER
+    FILTER -.-> LLM
+
+    classDef bad fill:#fecaca,stroke:#b91c1c,stroke-width:2px,color:#000
+    classDef good fill:#bbf7d0,stroke:#15803d,color:#000
+    classDef warn fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
+    class OUT,POISON bad
+    class X,FILTER good
+    class CACHE warn
+
+    %% edges: 0 A→FILTER, 1 BLOCKED, 2 V→CACHE, 3 HIT, 4 served, 5 miss, 6 →LLM
+    linkStyle 2,3,4 stroke:#b91c1c,stroke-width:4px

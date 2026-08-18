@@ -1,0 +1,40 @@
+%% SentryGate target architecture - Phase 1 (only poc_bypass.py exists yet).
+%% Regenerate/annotate each phase so the deck always matches what actually runs.
+%% Render: make diagram
+flowchart LR
+    C["Client<br/>OpenAI-compatible"] --> NG[Nginx] --> RL
+
+    subgraph GW["Gateway - FastAPI / Uvicorn"]
+        direction TB
+        RL["rate_limit.py<br/><i>denial of wallet</i>"]
+        SCR["screening.py<br/>deberta injection score<br/>Presidio PII scan<br/><b>→ Verdict</b>"]
+        CACHE["cache.py<br/>MiniLM 384-dim embed<br/><b>verdict-filtered search</b>"]
+        RV{"high-risk hit?<br/>re-verify"}
+        RTR["router.py<br/>cheap vs frontier<br/>+ fallback"]
+        OG["output_guard.py<br/><i>insecure output</i>"]
+
+        RL --> SCR --> CACHE
+        CACHE -->|hit| RV
+        RV -->|yes| SCR
+        RV -->|no| OG
+        CACHE -->|miss| RTR --> OG
+    end
+
+    SCR -.->|blocked| BLK["403 + reason"]
+
+    QD[("Qdrant<br/><b>payload = Verdict</b>")]
+    RD[("Redis<br/>budgets")]
+    CACHE <--> QD
+    RL <--> RD
+
+    RTR -.-> OAI["OpenAI"]
+    RTR -.-> ANT["Anthropic"]
+    OG --> OUT["Response"]
+
+    LOG["logging_mw.py — tokens, $ cost, verdict, cache outcome → JSONL (every metric comes from here)"]
+    GW -.-> LOG
+
+    classDef novel fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
+    classDef store fill:#dbeafe,stroke:#1d4ed8,color:#000
+    class CACHE,QD novel
+    class RD store
