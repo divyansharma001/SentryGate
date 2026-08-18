@@ -1,9 +1,30 @@
-# Phase 1 — how to present it
+# Phase 1 - how to present it
 
-**Window:** 18–22 Aug. **What's being assessed:** the synopsis. No working system is
+**Window:** 18-22 Aug. **What's being assessed:** the synopsis. No working system is
 expected. Your job is to prove the *problem is real* and that you've *scoped the build*.
 
 Everything below is backed by something committed in this repo. Nothing is a claim.
+
+---
+
+## The deck
+
+```bash
+make present     # serves it at http://127.0.0.1:8777/deck.html
+```
+
+14 slides, built by `docs/build_deck.py` from `docs/deck.template.html`. Every number
+on it is parsed out of a real captured run of `poc_bypass.py`, so the slides cannot
+drift from what the code prints. Regenerate with `make capture && make deck`.
+
+**Controls:** `->` / `<-` or click to move, **`F`** for full screen, **`N`** for
+presenter notes (the talk track below is embedded per-slide).
+
+> Click once inside the deck before using arrow keys - the browser gives the page
+> keyboard focus only after a click. In full screen this is not an issue.
+
+Slides 4, 7 and 8 earn the marks (the problem picture, the meters, the three numbers).
+Slides 11-13 prove you're not hand-waving. Don't linger on 1 and 3.
 
 ---
 
@@ -12,24 +33,6 @@ Everything below is backed by something committed in this repo. Nothing is a cla
 > A semantic cache in front of an LLM is an unscreened path to a screened-out response.
 
 If the reviewer remembers one thing, make it that.
-
----
-
-## Deck: 8 slides, ~8 minutes
-
-| # | Slide | Content | Source |
-|---|---|---|---|
-| 1 | Title | SentryGate — a security gateway for LLM APIs | — |
-| 2 | **The problem** | `docs/problem.png`. Two lanes: attack → filter → 403. Mutation → cache → secret. | committed |
-| 3 | Why it matters | Semantic caches are standard practice for cost/latency. Every one of them sits *in front of* the filter. | — |
-| 4 | **Live demo** | Run it. See choreography below. | `poc_bypass.py` |
-| 5 | The result | The measured table (below). | script output |
-| 6 | **The fix** | Verdict computed once at screening → stored in Qdrant payload → lookup becomes a *filtered* search. The filter **is** the retrieval predicate. | — |
-| 7 | Target architecture | `docs/architecture.png` + the 5-module mitigation table from the spec. | committed |
-| 8 | Plan & timeline | Phases 2–4 with the repo layout. "Here's what gets built, and when." | spec |
-
-Slides 2, 4, 5 are the ones that earn the marks. Slides 7–8 are the ones that prove
-you're not hand-waving. Don't spend time on 1 and 3.
 
 ---
 
