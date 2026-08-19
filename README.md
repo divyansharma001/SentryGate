@@ -63,6 +63,44 @@ model at all; they need a shift key.
 > `miss` and the live demo would have fallen flat. The surface/rewrite split
 > above is what actually reproduces.
 
+## Run it in Docker
+
+No Python setup, no venv. The models are baked into the image, so it runs
+with the network switched off.
+
+```bash
+docker compose build poc
+docker compose run --rm poc          # real filter, ~22s
+docker compose run --rm poc --fast   # keyword stand-in, ~5s
+```
+
+The `poc` service is declared with `network_mode: none`, which proves the demo
+has no hidden internet dependency - it physically cannot reach the network.
+
+`qdrant` and `redis` are declared too, behind a `phase2` profile, because
+Phase 2 needs them and they are plain images with no code required:
+
+```bash
+docker compose --profile phase2 up -d qdrant redis
+```
+
+## Why there are no API keys anywhere
+
+Phase 1 makes **zero calls to any LLM provider**. Both models run locally:
+
+| Model | Job | Size |
+|---|---|---|
+| `all-MiniLM-L6-v2` | turns a sentence into 384 numbers, so the cache can compare meanings | ~90 MB |
+| `protectai/deberta-v3-base-prompt-injection-v2` | scores how much a prompt looks like an attack | ~370 MB |
+
+Neither is a chat model, so neither needs a key. The "answer" in the cache is a
+hard-coded string - we never needed a real model to generate one, because the
+experiment is about *retrieval*, not generation.
+
+Real OpenAI/Anthropic keys are first needed in **Phase 2 Week 1**, when the
+gateway starts calling a real model on a cache miss. Copy `.env.example` to
+`.env` at that point; `.env` is gitignored and git refuses to stage it.
+
 ## Environment notes
 
 - **Python 3.11**, not the 3.14 that is first on `PATH` here. Presidio/spaCy and
