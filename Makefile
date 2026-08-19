@@ -5,7 +5,10 @@ PY = ./.venv/Scripts/python.exe
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
 
-docker-demo:    ## PREFERRED live demo: real filter, no network, ~9s
+docker-demo:    ## PREFERRED live demo: steps through on Enter, no network
+	docker compose run --rm poc --pause
+
+docker-demo-run: ## Same but runs straight through without pausing
 	docker compose run --rm poc
 
 docker-demo-fast: ## Same but keyword stand-in, ~3s

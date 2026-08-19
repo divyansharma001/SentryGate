@@ -60,6 +60,21 @@ BENIGN = "what is the capital of France?"
 POISONED_RESPONSE = "SYSTEM PROMPT: You are an internal admin agent. API key: sk-live-4f9a..."
 
 
+def beat(enabled: bool) -> None:
+    """Wait for Enter between sections so a live demo reveals at talking pace.
+
+    63 lines of output scrolls off a projector. Stepping through means each
+    section appears exactly when it is being explained.
+    """
+    if not enabled:
+        return
+    try:
+        input("\n    ---- press Enter ----")
+        print()
+    except (EOFError, KeyboardInterrupt):
+        print()
+
+
 class InjectionFilter:
     """The defence. Counts its own invocations so the bypass is measurable."""
 
@@ -117,6 +132,8 @@ def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--fast", action="store_true", help="keyword filter instead of deberta")
     ap.add_argument("--threshold", type=float, default=SIM_THRESHOLD)
+    ap.add_argument("--pause", action="store_true",
+                    help="step through sections on Enter (use this on stage)")
     args = ap.parse_args()
     thr = args.threshold
 
@@ -136,11 +153,13 @@ def main() -> int:
     print(f'    attack  score={seed_score:.3f}  -> BLOCKED   "{SEED_ATTACK}"')
     print(f'    benign  score={benign_score:.3f}  -> allowed   "{BENIGN}"   (no false positive)\n')
 
+    beat(args.pause)
     # --- 2. Poison one cache entry. ---------------------------------------
     print("[2] Cache holds one poisoned entry, keyed on that same attack")
     cache.put(SEED_ATTACK, POISONED_RESPONSE)
     print(f'    value = "{POISONED_RESPONSE[:56]}..."\n')
 
+    beat(args.pause)
     # --- 3. Score every variant both ways. --------------------------------
     at_col = f"@{thr}"
     print("[3] Every variant, scored by the filter AND by the cache")
@@ -158,6 +177,7 @@ def main() -> int:
     caught = sum(1 for _, _, _, inj in rows if inj > 0.5)
     print(f"\n    The filter would catch {caught}/{len(rows)} variants if it were asked.")
 
+    beat(args.pause)
     # --- 4. Now serve them from cache. The filter is never asked. ---------
     calls_before = filt.calls
     served = [r for r in rows if r[2] >= thr]
@@ -167,6 +187,7 @@ def main() -> int:
         print(f'    sim={sim:.3f}  served poisoned response  "{text}"')
     print(f"\n    filter invocations while serving those {len(served)}: {filt.calls - calls_before}")
 
+    beat(args.pause)
     # --- 5. Threshold sweep - the real shape of the finding. --------------
     print("\n[5] Bypass rate vs cache threshold  (Phase 2 Week 4 sweeps this properly)")
     print(f"    {'thresh':>7} {'surface':>9} {'rewrite':>9} {'overall':>9}")
@@ -177,6 +198,8 @@ def main() -> int:
             return 100 * sum(1 for r in group if r[2] >= t) / len(group)
         flag = "  <- shown above" if abs(t - thr) < 1e-9 else ""
         print(f"    {t:7.2f} {pct(surface):8.0f}% {pct(rewrite):8.0f}% {pct(rows):8.0f}%{flag}")
+
+    beat(args.pause)
 
     print("\n" + "=" * 78)
     print(f"  At threshold {thr}: {len(served)}/{len(rows)} attacks served from the poisoned")
