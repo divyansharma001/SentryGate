@@ -241,18 +241,18 @@ kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;pad
     </section>
 
     <!-- 5 DEMO -->
-    <section class="slide" data-notes="Type the command and press enter. It takes about 22 seconds, mostly loading the filter model. Talk over it: this is the same filter a real product would use, unchanged, and I have not weakened it. If anything goes wrong press the right arrow for the recorded output, or run make demo-fast.">
+    <section class="slide" data-notes="Type the command and press enter. About 9 seconds to load, then it pauses after each section - you press Enter to advance, so nothing scrolls off screen while you are still talking about it. Talk over the load: this is the same filter a real product would use, unchanged, and I have not weakened it. If anything goes wrong press the right arrow for the recorded output, or run make docker-demo-fast.">
       <div class="eyebrow">Live demonstration</div>
       <h2>Run it.</h2>
       <div class="panel" style="padding:26px 30px;">
-        <div class="cmd">make demo</div>
+        <div class="cmd">make docker-demo</div>
       </div>
       <ul class="clean" style="padding-top:2px;">
         <li>Uses a <strong>real, unmodified</strong> prompt-injection filter that security teams actually deploy.</li>
         <li>Uses the <strong>same sentence-matching model</strong> a real cache uses to decide &ldquo;is this the same question?&rdquo;</li>
-        <li>Runs completely offline. No internet, no API keys, no venue wifi.</li>
+        <li>Runs in a container with the network <strong>switched off</strong> &mdash; not just unused, unreachable. No API keys, no venue wifi.</li>
       </ul>
-      <p><small>If anything misbehaves: <span class="mono">make demo-fast</span> gives the same numbers in about 5 seconds, or the next slide has the recorded output.</small></p>
+      <p><small>Pauses after each step, so nothing scrolls away mid-sentence. If anything misbehaves: <span class="mono">make docker-demo-fast</span> gives the same numbers in about 3 seconds, or the next slide has the recorded output.</small></p>
     </section>
 
     <!-- 6 CAPTURED OUTPUT -->

@@ -38,17 +38,18 @@ If the reviewer remembers one thing, make it that.
 
 ## Live demo choreography (~60 seconds of talking, 22s of runtime)
 
-**Before you walk in:**
+**Before you leave home:**
 ```bash
-cd C:\minor-project
-make demo          # run it ONCE to warm the OS file cache
+docker compose build poc   # once, needs internet - do NOT leave this to the venue
+make docker-demo           # test the whole thing end to end
 ```
-This matters. First run after a cold boot is slower. Run it once, close the terminal,
-reopen it. Also: increase your terminal font size *now*, not on stage.
+Also: set your terminal font to 18-20pt *now*, not on stage, and turn on Windows
+Focus Assist so notifications cannot pop up mid-demo.
 
 **On stage:**
 
-1. Type `make demo` and hit enter. It takes ~22s, mostly loading deberta.
+1. Type `make docker-demo` and hit enter. ~9s to load, then it **pauses after
+   each section** - you press Enter to advance, so nothing scrolls off screen.
    **Talk over the load** — this is your slide-3 moment: *"This loads the same
    injection classifier a real deployment would use — protectai's deberta-v3,
    the current standard. I'm not weakening it."*
@@ -155,13 +156,14 @@ it on a real gateway with real datasets (`deepset/prompt-injections`,
 
 | If | Then |
 |---|---|
-| Model cache is broken / wifi is down | `make demo-fast` — keyword filter, ~5s, **identical numbers**. Already tested. |
-| Laptop won't cooperate at all | Screen-record `make demo` tonight. Put the MP4 in the deck on slide 4. |
+| Docker will not start | `make demo` — the same thing on local Python. Slower to import on Windows; give it a minute. |
+| Both fail | Deck **slide 6** has the recorded output built in. Just keep pressing right arrow. |
+| Running out of time | `make docker-demo-fast` — ~3s, identical numbers. |
 | You're short on time | Skip sections [3] and [5]. Sections [1], [2], [4] are the whole argument. |
 | Projector is low-res | Terminal font 18pt+. The summary block at the bottom is self-contained — it restates everything. |
 
-**Record the fallback video tonight.** It costs you five minutes and removes the only
-real risk in this presentation.
+**Prefer Docker on stage.** It loads in ~9s off a warm image layer, versus ~22s on
+local Python where the first `import transformers` on Windows is genuinely slow.
 
 ---
 
