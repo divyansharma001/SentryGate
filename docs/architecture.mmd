@@ -1,40 +1,70 @@
-%% SentryGate target architecture - Phase 1 (only poc_bypass.py exists yet).
-%% Regenerate/annotate each phase so the deck always matches what actually runs.
+%% SentryGate - the complete system as it will exist at the end of Phase 4.
+%% Amber = our contribution. Everything else is standard gateway machinery.
 %% Render: make diagram
 flowchart LR
-    C["Client<br/>OpenAI-compatible"] --> NG[Nginx] --> RL
 
-    subgraph GW["Gateway - FastAPI / Uvicorn"]
+    subgraph CL[" CLIENTS "]
         direction TB
-        RL["rate_limit.py<br/><i>denial of wallet</i>"]
-        SCR["screening.py<br/>deberta injection score<br/>Presidio PII scan<br/><b>→ Verdict</b>"]
-        CACHE["cache.py<br/>MiniLM 384-dim embed<br/><b>verdict-filtered search</b>"]
-        RV{"high-risk hit?<br/>re-verify"}
-        RTR["router.py<br/>cheap vs frontier<br/>+ fallback"]
-        OG["output_guard.py<br/><i>insecure output</i>"]
-
-        RL --> SCR --> CACHE
-        CACHE -->|hit| RV
-        RV -->|yes| SCR
-        RV -->|no| OG
-        CACHE -->|miss| RTR --> OG
+        APP["Any app that speaks<br/>the OpenAI API"]
+        LOAD["Load test<br/><i>replays real traffic</i>"]
+        ATK["Attack suite<br/><i>generates rewordings</i>"]
     end
 
-    SCR -.->|blocked| BLK["403 + reason"]
+    NG["<b>Nginx</b><br/>TLS, routing"]
 
-    QD[("Qdrant<br/><b>payload = Verdict</b>")]
-    RD[("Redis<br/>budgets")]
+    subgraph GW[" THE GATEWAY &nbsp;&mdash;&nbsp; FastAPI "]
+        direction TB
+        RL["<b>Spend limit</b><br/>tokens + requests per key"]
+        SCR["<b>Safety check</b><br/>attack detector<br/>personal-data detector<br/><b>&rarr; SAFETY LABEL</b>"]
+        CACHE["<b>Cache</b><br/>matches wording <b>AND</b><br/>safety label"]
+        REV["<b>Re-check</b><br/>risky topics only"]
+        RTR["<b>Model picker</b><br/>cheap vs premium<br/>+ failover"]
+        OG["<b>Answer check</b><br/>no code, no secrets"]
+        LOG["<b>Recorder</b><br/>cost, speed, outcome"]
+
+        RL --> SCR --> CACHE
+        CACHE -->|found| REV --> OG
+        CACHE -->|not found| RTR
+        RTR --> OG
+        OG --> LOG
+    end
+
+    subgraph ST[" STORAGE "]
+        direction TB
+        QD[("<b>Qdrant</b><br/>question meanings<br/><b>+ safety labels</b>")]
+        RD[("Redis<br/>exact repeats<br/>spend counters")]
+        JL[("Request log<br/>one line per request")]
+    end
+
+    subgraph PR[" AI PROVIDERS "]
+        direction TB
+        OAI["OpenAI"]
+        ANT["Anthropic"]
+    end
+
+    subgraph EV[" EVALUATION "]
+        direction TB
+        FIG["Charts + tables<br/><i>all generated from the log</i>"]
+        ABL["Ablation runs<br/><i>each layer off in turn</i>"]
+    end
+
+    APP --> NG
+    LOAD --> NG
+    ATK --> NG
+    NG --> RL
+
+    SCR -.->|blocked| BLK["Refused<br/>+ reason"]
     CACHE <--> QD
     RL <--> RD
+    LOG --> JL
+    RTR --> OAI
+    RTR --> ANT
+    JL --> FIG
+    JL --> ABL
 
-    RTR -.-> OAI["OpenAI"]
-    RTR -.-> ANT["Anthropic"]
-    OG --> OUT["Response"]
-
-    LOG["logging_mw.py — tokens, $ cost, verdict, cache outcome → JSONL (every metric comes from here)"]
-    GW -.-> LOG
-
-    classDef novel fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
+    classDef ours fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
     classDef store fill:#dbeafe,stroke:#1d4ed8,color:#000
-    class CACHE,QD novel
-    class RD store
+    classDef stop fill:#fecaca,stroke:#b91c1c,color:#000
+    class CACHE,REV,QD ours
+    class RD,JL store
+    class BLK stop

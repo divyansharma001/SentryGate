@@ -148,6 +148,19 @@ ul.clean li::before{
 }
 ul.clean li.na::before{background:var(--line);}
 
+/* ---- flow diagram band ----
+   Block, not flex: a flex item's default min-width:auto stops the image
+   shrinking below its intrinsic 2000px and it overflows the slide. */
+.flowband{width:100%;text-align:center;}
+.flowband img{max-width:100%;max-height:205px;height:auto;object-fit:contain;}
+
+/* ---- numbered legend beside the flow diagram ---- */
+.legend{display:grid;grid-template-columns:1fr 1fr;gap:10px 30px;}
+.lg{display:grid;grid-template-columns:24px 1fr;gap:11px;align-items:baseline;font-size:16px;line-height:1.4;}
+.lg-n{font-family:"IBM Plex Mono",monospace;font-weight:600;color:var(--accent);font-size:15px;}
+.lg.ours .lg-n{color:var(--accent);}
+.lg.plain .lg-n{color:var(--muted);}
+
 /* ---- phase rail ---- */
 .rail{display:flex;flex-direction:column;}
 .ph{display:grid;grid-template-columns:44px 128px 1fr auto;gap:18px;align-items:baseline;padding:14px 0;border-bottom:1px solid var(--line);}
@@ -333,12 +346,31 @@ kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;pad
       </ul>
     </section>
 
-    <!-- 11 ARCHITECTURE -->
-    <section class="slide" data-notes="Say plainly that this is the build target, not what runs today. The orange parts are the new contribution. Mention the diagram is generated from a file in the repo and redrawn every phase, so it never drifts from what actually runs.">
-      <div class="eyebrow">What gets built</div>
-      <h2>The full system.</h2>
-      <div class="figframe"><img src="{{ARCH_PNG}}" alt="The planned gateway: requests pass through rate limiting, then the safety check, then a cache lookup that also checks the saved safety record, with risky matches re-verified and misses routed to a cheap or premium AI model before the response is scanned on the way out."></div>
-      <p><small>Orange parts are the new contribution. This diagram is generated from a file in the repo and redrawn each phase, so it always matches what actually runs.</small></p>
+    <!-- 11 HOW IT WORKS -->
+    <section class="slide" data-notes="Walk the numbers left to right. One and two are ordinary gateway machinery. Three is the contribution: the cache has to match the wording AND the safety label, so a reworded attack no longer matches a safe answer. Four re-checks only the risky ones, so we keep the speed. Seven is what makes three possible - the label is saved with the answer. Say clearly that orange is ours and blue is standard.">
+      <div class="eyebrow">How it works</div>
+      <h2>The journey of one question.</h2>
+      <div class="flowband">
+        <img src="{{FLOW_PNG}}" alt="A question passes a budget check, then a safety check that produces a safety label, then a cache lookup that matches on wording and label together; a hit is re-checked if risky, a miss picks a model and asks the AI, and the answer is checked and saved together with its safety label.">
+      </div>
+      <div class="legend">
+        <div class="lg plain"><span class="lg-n">1</span><span>Has this user gone over their spending cap?</span></div>
+        <div class="lg ours"><span class="lg-n">5</span><span>Simple question &rarr; cheap model. Hard one &rarr; premium.</span></div>
+        <div class="lg plain"><span class="lg-n">2</span><span>Is it an attack? Personal data? <strong>This produces the safety label.</strong></span></div>
+        <div class="lg plain"><span class="lg-n">6</span><span>Scan the reply before sending &mdash; no code, no secrets.</span></div>
+        <div class="lg ours"><span class="lg-n">3</span><span><strong>The fix.</strong> A match needs the wording <strong>and</strong> the label to agree.</span></div>
+        <div class="lg ours"><span class="lg-n">7</span><span><strong>Save the label with the answer</strong> &mdash; this is what makes step 3 possible.</span></div>
+        <div class="lg ours"><span class="lg-n">4</span><span>Risky topics get re-checked. Everything else stays fast.</span></div>
+        <div class="lg plain"><span class="lg-n">&#9642;</span><span class="dim">Orange is our contribution. Blue is standard machinery.</span></div>
+      </div>
+    </section>
+
+    <!-- 12 COMPLETE SYSTEM -->
+    <section class="slide" data-notes="This is everything, at the end of Phase 4. Five zones: who calls it, the gateway itself, what it stores, the AI providers, and the evaluation harness. Point out that the attack suite and load test are clients too - they go through the same front door, which is what makes the results honest. And that every chart in the final report comes out of the request log on the right.">
+      <div class="eyebrow">The complete system</div>
+      <h2>What we will have built by November.</h2>
+      <div class="figframe"><img src="{{ARCH_PNG}}" alt="Five zones: clients including the load test and attack suite; the FastAPI gateway containing spend limits, safety check, verdict-matched cache, re-check, model picker, answer check and recorder; storage in Qdrant, Redis and a request log; OpenAI and Anthropic as providers; and an evaluation zone generating charts and ablation runs from the log."></div>
+      <p><small>The attack suite and load test go in through the <strong>same front door</strong> as real traffic &mdash; that is what makes the measurements honest. Every chart in the final report is generated from the request log.</small></p>
     </section>
 
     <!-- 12 MITIGATIONS -->

@@ -108,7 +108,8 @@ def terminal(text: str) -> str:
 def main() -> int:
     tpl_path = DOCS / "deck.template.html"
     cap_path = CAP / "demo-output.txt"
-    for p in (tpl_path, cap_path, CAP / "problem-dark.png", CAP / "architecture-dark.png"):
+    for p in (tpl_path, cap_path, CAP / "problem-dark.png",
+              CAP / "architecture-dark.png", CAP / "flow-dark.png"):
         if not p.exists():
             print(f"missing: {p}", file=sys.stderr)
             return 1
@@ -128,8 +129,10 @@ def main() -> int:
     out = out.replace("{{TERM_HTML}}", terminal(captured))
     out = out.replace("{{PROBLEM_PNG}}", b64(CAP / "problem-dark.png"))
     out = out.replace("{{ARCH_PNG}}", b64(CAP / "architecture-dark.png"))
+    out = out.replace("{{FLOW_PNG}}", b64(CAP / "flow-dark.png"))
 
-    for token in ("{{METERS}}", "{{TERM_HTML}}", "{{PROBLEM_PNG}}", "{{ARCH_PNG}}"):
+    for token in ("{{METERS}}", "{{TERM_HTML}}", "{{PROBLEM_PNG}}",
+                  "{{ARCH_PNG}}", "{{FLOW_PNG}}"):
         if token in out:
             print(f"unsubstituted token: {token}", file=sys.stderr)
             return 1
