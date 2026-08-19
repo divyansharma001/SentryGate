@@ -110,7 +110,7 @@ and git refuses to stage it.
 make present     # then open http://127.0.0.1:8777/deck.html
 ```
 
-14 slides. `→` / `←` to move, **F** for full screen, **N** for presenter notes.
+15 slides. `→` / `←` to move, **F** for full screen, **N** for presenter notes.
 Click once inside the page first — browsers only give it keyboard focus after a
 click.
 

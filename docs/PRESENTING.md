@@ -13,7 +13,7 @@ Everything below is backed by something committed in this repo. Nothing is a cla
 make present     # serves it at http://127.0.0.1:8777/deck.html
 ```
 
-14 slides, built by `docs/build_deck.py` from `docs/deck.template.html`. Every number
+15 slides, built by `docs/build_deck.py` from `docs/deck.template.html`. Every number
 on it is parsed out of a real captured run of `poc_bypass.py`, so the slides cannot
 drift from what the code prints. Regenerate with `make capture && make deck`.
 
@@ -24,19 +24,19 @@ presenter notes (the talk track below is embedded per-slide).
 > keyboard focus only after a click. In full screen this is not an issue.
 
 Slides 4, 7 and 8 earn the marks (the problem picture, the meters, the three numbers).
-Slides 11-13 prove you're not hand-waving. Don't linger on 1 and 3.
+Slides 11-14 prove you're not hand-waving. Don't linger on 1 and 3.
 
 ---
 
 ## The one sentence
 
-> A semantic cache in front of an LLM is an unscreened path to a screened-out response.
+> The cache can hand out an answer that the safety filter already blocked.
 
 If the reviewer remembers one thing, make it that.
 
 ---
 
-## Live demo choreography (~60 seconds of talking, 22s of runtime)
+## Live demo choreography (~60 seconds of talking, ~9s of loading)
 
 **Before you leave home:**
 ```bash
@@ -76,7 +76,8 @@ Focus Assist so notifications cannot pop up mid-demo.
 6. **Section [5].** The sweep.
    > "And this holds across every threshold anyone actually deploys."
 
-7. Stop talking. Let it sit for two seconds. Then go to slide 6 (the fix).
+7. Stop talking. Let it sit for two seconds. Then Alt-Tab back and go to
+   slide 10 (the fix).
 
 ---
 
@@ -158,8 +159,7 @@ it on a real gateway with real datasets (`deepset/prompt-injections`,
 |---|---|
 | Docker will not start | `make demo` — the same thing on local Python. Slower to import on Windows; give it a minute. |
 | Both fail | Deck **slide 6** has the recorded output built in. Just keep pressing right arrow. |
-| Running out of time | `make docker-demo-fast` — ~3s, identical numbers. |
-| You're short on time | Skip sections [3] and [5]. Sections [1], [2], [4] are the whole argument. |
+| Running out of time | `make docker-demo-fast` — ~3s, identical numbers. Or skip sections [3] and [5]; [1], [2] and [4] are the whole argument. |
 | Projector is low-res | Terminal font 18pt+. The summary block at the bottom is self-contained — it restates everything. |
 
 **Prefer Docker on stage.** It loads in ~9s off a warm image layer, versus ~22s on

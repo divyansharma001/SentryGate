@@ -1,6 +1,6 @@
 PY = ./.venv/Scripts/python.exe
 
-.PHONY: docker-build docker-demo docker-demo-fast phase2-up phase2-down \n        demo demo-fast poc poc-fast capture diagram deck present freeze
+.PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -36,11 +36,10 @@ capture:        ## Re-record the run the deck quotes from
 	HF_HUB_OFFLINE=1 $(PY) poc_bypass.py > docs/captures/demo-output.txt 2>&1
 	sed -i 's/\r$$//' docs/captures/demo-output.txt
 
-diagram:        ## mermaid sources -> png, light for print + dark for the deck
-	npx -y @mermaid-js/mermaid-cli -i docs/problem.mmd      -o docs/problem.png      -b white -w 1800
-	npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/architecture.png -b white -w 1800
-	npx -y @mermaid-js/mermaid-cli -i docs/problem.mmd      -o docs/captures/problem-dark.png      -t dark -b transparent -w 2000
-	npx -y @mermaid-js/mermaid-cli -i docs/architecture.mmd -o docs/captures/architecture-dark.png -t dark -b transparent -w 2000
+MMD = problem flow architecture
+
+diagram:        ## every mermaid source -> png, light for print + dark for the deck
+	@for d in $(MMD); do 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/$$d.png -b white -w 1800; 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/captures/$$d-dark.png -t dark -b transparent -w 2000; 	done
 
 deck:           ## Rebuild docs/deck.html from the template + the captured run
 	$(PY) docs/build_deck.py
