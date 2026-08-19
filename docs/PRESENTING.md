@@ -140,6 +140,26 @@ standard, unmodified, and it scored 1.000 on all ten variants. Using a *better* 
 makes my point stronger, not weaker — the gap isn't detection quality, it's that
 detection is never invoked.
 
+**"You should cover more attack types."** (the feedback from last time)
+Slide 12 answers this against OWASP's list rather than our own judgement. Five of
+the OWASP LLM Top 10 risk categories, each handled by a separate module: prompt
+injection, sensitive information disclosure, improper output handling, unbounded
+consumption, and vector/embedding weaknesses.
+
+Then say what is **out** of scope and why - this is what makes the list credible:
+supply chain and model poisoning are training-time problems, not gateway problems;
+excessive agency needs tool-calling, which we do not do; misinformation needs
+ground truth and is a research problem of its own.
+
+The strongest line: *"Our contribution sits inside a category OWASP already
+recognises - vector and embedding weaknesses. We are not inventing a threat, we
+are showing a specific, cheap, reproducible instance of a known one."*
+
+> Verify the exact category names and numbering against the current OWASP PDF
+> before presenting. The 2026 edition renumbered several entries - Excessive
+> Agency moved up, Unbounded Consumption rose four places - so quote the
+> **names**, not the LLM01-LLM10 numbers.
+
 **"What's actually novel here?"**
 Storing the security verdict in the vector payload so retrieval itself is
 verdict-filtered. Caches filter on similarity; nobody filters on security state. That

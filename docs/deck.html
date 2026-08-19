@@ -420,22 +420,25 @@ kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;pad
     </section>
 
     <!-- 12 MITIGATIONS -->
-    <section class="slide" data-notes="This answers the earlier feedback about covering more attack types. Each row is a real file in the plan, not a promise. Say: broader coverage here is a list of files, not a claim.">
-      <div class="eyebrow">Attack types covered</div>
-      <h2>Five parts, five kinds of attack.</h2>
-      <div class="panel fill" style="overflow:auto;">
+    <section class="slide" data-notes="This answers the feedback about covering more attack types, and it answers it against someone else's list rather than our own. Five of the OWASP LLM Top Ten risk categories, each handled by a separate small module. Then say the important part out loud: the other categories are deliberately out of scope, and name why. Supply chain and model poisoning are training-time problems, not gateway problems. Excessive agency needs tool-calling, which we do not do. Misinformation needs ground truth and is a research problem of its own. Naming what you are NOT doing is what makes the list credible.">
+      <div class="eyebrow">Attack coverage</div>
+      <h2>Five parts, mapped to the industry standard list.</h2>
+      <div class="panel" style="overflow:auto;">
         <table>
-          <thead><tr><th>Part</th><th>Attack it stops</th><th>How</th></tr></thead>
+          <thead><tr><th>Our part</th><th>OWASP LLM risk category</th><th>How we stop it</th></tr></thead>
           <tbody>
-            <tr><td class="mono amber">cache</td><td>Poisoned cache <span class="dim">(our focus)</span></td><td>match on safety record, not just wording</td></tr>
-            <tr><td class="mono">screening</td><td>Prompt injection</td><td>filter score too high &rarr; block</td></tr>
-            <tr><td class="mono">screening</td><td>Leaking personal data</td><td>detect names, emails, cards &rarr; block or hide</td></tr>
-            <tr><td class="mono">output guard</td><td>Dangerous replies</td><td>scan the answer for code before sending it</td></tr>
-            <tr><td class="mono">rate limit</td><td>Running up the bill</td><td>spending cap per user key</td></tr>
+            <tr><td class="mono amber">cache</td><td class="amber"><strong>Vector &amp; embedding weaknesses</strong></td><td>match on the safety label, not just wording</td></tr>
+            <tr><td class="mono">screening</td><td>Prompt injection</td><td>attack score too high &rarr; block</td></tr>
+            <tr><td class="mono">screening</td><td>Sensitive information disclosure</td><td>detect names, emails, cards &rarr; block or hide</td></tr>
+            <tr><td class="mono">output guard</td><td>Improper output handling</td><td>scan the reply for code before sending</td></tr>
+            <tr><td class="mono">rate limit</td><td>Unbounded consumption</td><td>spending cap per user key</td></tr>
           </tbody>
         </table>
       </div>
-      <p><small>Each one is a separate small file in the plan &mdash; coverage is a list of files, not a claim.</small></p>
+      <ul class="clean" style="gap:10px;">
+        <li><strong>Deliberately out of scope</strong>, and why: supply chain and model poisoning are training-time problems, not gateway problems. Excessive agency needs tool-calling, which we do not do. Misinformation needs ground truth.</li>
+        <li>Each part is a separate small module &mdash; coverage is a list of files, not a claim.</li>
+      </ul>
     </section>
 
     <!-- 13 PLAN -->
