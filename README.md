@@ -20,6 +20,12 @@ wording alone is no longer a match.
 
 ---
 
+## Team
+
+Divyansh Sharma &middot; Sarvagya Dabas &middot; Yashvit Gauri
+
+---
+
 ## Quick start
 
 ```bash
