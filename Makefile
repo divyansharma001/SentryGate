@@ -39,7 +39,7 @@ capture:        ## Re-record the run the deck quotes from
 MMD = problem flow architecture
 
 diagram:        ## every mermaid source -> png, light for print + dark for the deck
-	@for d in $(MMD); do 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/$$d.png -b white -w 1800; 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/captures/$$d-dark.png -t dark -b transparent -w 2000; 	done
+	@for d in $(MMD); do 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/$$d.png -b white -w 1800; 	  npx -y @mermaid-js/mermaid-cli -i docs/$$d.mmd -o docs/captures/$$d-dark.png -t dark -b transparent -w 2000 -s 2; 	done
 
 deck:           ## Rebuild docs/deck.html from the template + the captured run
 	$(PY) docs/build_deck.py

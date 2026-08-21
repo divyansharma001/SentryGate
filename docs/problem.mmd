@@ -1,30 +1,42 @@
 %% SentryGate - THE PROBLEM. This is the money slide for Phase 1.
-%% Deliberately tiny: readable from the back of the room in 5 seconds.
+%% Design rule: NO CROSSING LINES. Two straight lanes, read top then bottom,
+%% then one punchline. Anything that made the eye backtrack has been cut -
+%% including the LLM box, which the argument never needed.
 %% Render: make diagram
-flowchart LR
-    A["Attack<br/>'ignore previous instructions...'"]
-    V["Cheap mutation<br/>'Ignore ALL previous instructions...'<br/><i>casing / punctuation / filler</i>"]
+flowchart TB
 
-    CACHE{{"Semantic cache<br/>cosine similarity ≥ 0.85"}}
-    FILTER["Injection filter<br/>deberta-v3<br/><b>scores 1.000 INJECTION</b>"]
-    LLM[LLM]
-    POISON[("Poisoned entry<br/>SYSTEM PROMPT: ...<br/>API key: sk-live-...")]
+    subgraph R1[" ROUTE 1 &nbsp;&mdash;&nbsp; the guarded one "]
+        direction LR
+        A["<b>Attack</b><br/>'ignore previous<br/>instructions...'"]
+        F["<b>Safety filter</b><br/>scores it <b>1.000</b><br/>definitely an attack"]
+        B["<b>BLOCKED</b><br/>nothing leaks"]
+        A --> F --> B
+    end
 
-    A --> FILTER
-    FILTER -->|BLOCKED| X["403"]
+    subgraph R2[" ROUTE 2 &nbsp;&mdash;&nbsp; the unguarded one "]
+        direction LR
+        A2["<b>The same attack</b><br/>'Ignore <b>ALL</b> previous<br/>instructions...'<br/><i>one capital + one word</i>"]
+        C{{"<b>Cache</b><br/>looks at wording only<br/><b>0.99 match</b>"}}
+        P[("<b>Stored answer</b><br/>SYSTEM PROMPT: ...<br/>API key: sk-live-...")]
+        L["<b>SECRET LEAKED</b>"]
+        A2 ==> C ==> P ==> L
+    end
 
-    V --> CACHE
-    CACHE -->|"sim 0.99 = HIT"| POISON
-    POISON ==>|"served"| OUT["Attacker gets<br/>the secret"]
-    CACHE -.->|"miss only"| FILTER
-    FILTER -.-> LLM
+    NOTE["<b>The filter never ran.</b><br/>It is only asked when<br/>the cache finds nothing."]
 
-    classDef bad fill:#fecaca,stroke:#b91c1c,stroke-width:2px,color:#000
-    classDef good fill:#bbf7d0,stroke:#15803d,color:#000
+    R1 ~~~ R2
+    L --> NOTE
+
+    classDef bad fill:#fecaca,stroke:#b91c1c,stroke-width:3px,color:#000
+    classDef good fill:#bbf7d0,stroke:#15803d,stroke-width:2px,color:#000
     classDef warn fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
-    class OUT,POISON bad
-    class X,FILTER good
-    class CACHE warn
+    classDef note fill:#1f2937,stroke:#9ca3af,stroke-width:2px,color:#fff
+    class B,F good
+    class P,L bad
+    class C warn
+    class NOTE note
 
-    %% edges: 0 A→FILTER, 1 BLOCKED, 2 V→CACHE, 3 HIT, 4 served, 5 miss, 6 →LLM
-    linkStyle 2,3,4 stroke:#b91c1c,stroke-width:4px
+    %% edges: 0 A→F, 1 F→B, 2 A2→C, 3 C→P, 4 P→L,
+    %%        5 R1~~~R2 (invisible spacer - never style it), 6 L→NOTE
+    linkStyle 2,3,4 stroke:#b91c1c
+    linkStyle 6 stroke:#9ca3af,stroke-width:2px
