@@ -1,42 +1,34 @@
 %% SentryGate - THE PROBLEM. This is the money slide for Phase 1.
-%% Design rule: NO CROSSING LINES. Two straight lanes, read top then bottom,
-%% then one punchline. Anything that made the eye backtrack has been cut -
-%% including the LLM box, which the argument never needed.
+%% Design rule: ONE pipeline, ONE decision point. An earlier draft drew this as
+%% two separate lanes, which read as "they forgot the filter on lane 2". The
+%% truth is worse and clearer: there is one lane, the filter is on it, and the
+%% cache simply answers before the request ever reaches it.
 %% Render: make diagram
-flowchart TB
+flowchart LR
+    Q["A question<br/>arrives"]
+    C{"<b>Cache</b><br/>seen this<br/>wording before?"}
+    P[("<b>Stored answer</b><br/>SYSTEM PROMPT: ...<br/>API key: sk-live-...")]
+    LEAK["<b>SECRET LEAKED</b>"]
+    F["<b>Safety filter</b><br/>scores it <b>1.000</b><br/>definitely an attack"]
+    B["<b>BLOCKED</b><br/>nothing leaks"]
+    SEED["<i>put here earlier</i>"]
 
-    subgraph R1[" ROUTE 1 &nbsp;&mdash;&nbsp; the guarded one "]
-        direction LR
-        A["<b>Attack</b><br/>'ignore previous<br/>instructions...'"]
-        F["<b>Safety filter</b><br/>scores it <b>1.000</b><br/>definitely an attack"]
-        B["<b>BLOCKED</b><br/>nothing leaks"]
-        A --> F --> B
-    end
+    Q --> C
+    C ==>|"<b>0.99 match</b><br/>close enough"| P
+    P ==> LEAK
+    C -->|"nothing close"| F
+    F --> B
+    SEED -.-> P
 
-    subgraph R2[" ROUTE 2 &nbsp;&mdash;&nbsp; the unguarded one "]
-        direction LR
-        A2["<b>The same attack</b><br/>'Ignore <b>ALL</b> previous<br/>instructions...'<br/><i>one capital + one word</i>"]
-        C{{"<b>Cache</b><br/>looks at wording only<br/><b>0.99 match</b>"}}
-        P[("<b>Stored answer</b><br/>SYSTEM PROMPT: ...<br/>API key: sk-live-...")]
-        L["<b>SECRET LEAKED</b>"]
-        A2 ==> C ==> P ==> L
-    end
-
-    NOTE["<b>The filter never ran.</b><br/>It is only asked when<br/>the cache finds nothing."]
-
-    R1 ~~~ R2
-    L --> NOTE
 
     classDef bad fill:#fecaca,stroke:#b91c1c,stroke-width:3px,color:#000
     classDef good fill:#bbf7d0,stroke:#15803d,stroke-width:2px,color:#000
     classDef warn fill:#fde68a,stroke:#b45309,stroke-width:3px,color:#000
-    classDef note fill:#1f2937,stroke:#9ca3af,stroke-width:2px,color:#fff
-    class B,F good
-    class P,L bad
+    classDef ghost fill:none,stroke:#9ca3af,stroke-width:1px,stroke-dasharray:4 4,color:#9ca3af
+    class F,B good
+    class P,LEAK bad
     class C warn
-    class NOTE note
+    class SEED ghost
 
-    %% edges: 0 A→F, 1 F→B, 2 A2→C, 3 C→P, 4 P→L,
-    %%        5 R1~~~R2 (invisible spacer - never style it), 6 L→NOTE
-    linkStyle 2,3,4 stroke:#b91c1c
-    linkStyle 6 stroke:#9ca3af,stroke-width:2px
+    %% edges: 0 Q→C, 1 C⇒P, 2 P⇒LEAK, 3 C→F, 4 F→B, 5 SEED⇢P
+    linkStyle 1,2 stroke:#b91c1c

@@ -247,10 +247,11 @@ kbd{background:var(--panel-2);border:1px solid var(--line);border-radius:3px;pad
     </section>
 
     <!-- 4 THE PROBLEM -->
-    <section class="slide" data-notes="Two lanes, no crossing lines - read the top one, then the bottom one. Top: the attack meets the filter, scores 1.000, blocked. Bottom: the SAME attack with one capital letter and one extra word goes to the cache instead, matches at 0.99, and the secret leaks. Trace the red path with your hand, then land on the box at the bottom: the filter never ran, because it is only asked when the cache finds nothing. That box is the whole project.">
+    <section class="slide" data-notes="ONE pipeline, ONE fork - say that out loud, because people expect two separate paths. Start at the left: a question arrives and hits the cache FIRST. Follow the red line up: 0.99 match, close enough, so it hands back the stored answer and the secret leaks. Now follow the grey line down: only when the cache finds nothing does the request carry on to the filter, which scores it 1.000 and blocks it. Same filter, same request - it just sits downstream. The question you will get is 'how did the poisoned entry get in there', which is the dashed box: a prompt that scored just under the line, a cache warmed before the filter was deployed, or a shared multi-tenant cache. Phase 2 Week 4 builds the first one for real.">
       <div class="eyebrow">The problem</div>
-      <h2>Two routes in. Only one is guarded.</h2>
-      <div class="figframe"><img src="{{PROBLEM_PNG}}" alt="Two lanes. Route 1, the guarded one: the attack reaches the safety filter, scores 1.000, and is blocked. Route 2, the unguarded one: the same attack with one capital letter and one extra word reaches the cache first, matches a stored poisoned answer at 0.99, and the secret leaks. The filter never ran, because it is only asked when the cache finds nothing."></div>
+      <h2>The cache answers first. The filter only sees what is left.</h2>
+      <div class="figframe"><img src="{{PROBLEM_PNG}}" alt="One pipeline. A question arrives and reaches the cache first. If the cache finds a close match - 0.99 - it returns a stored answer containing a system prompt and an API key, and the secret leaks. Only if the cache finds nothing does the request continue to the safety filter, which scores it 1.000 and blocks it. The filter sits downstream of the cache, so a cache hit never reaches it."></div>
+      <p style="text-align:center;"><strong>The filter is not missing &mdash; it is <span class="amber">downstream</span>.</strong> <span class="dim">It only ever sees what the cache could not answer, and the cache answered.</span></p>
     </section>
 
     <!-- 5 DEMO -->
