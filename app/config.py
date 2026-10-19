@@ -108,6 +108,9 @@ class Settings:
     # rules above pick (fast, but misses attacks the keyword label calls
     # harmless). all = every hit (safe; still skips the paid model call).
     reverify_scope: str
+    # Phase 4 ablation: off = no safety check at all, every question counts as
+    # clean. Only for measuring what the filter adds. Never run a real gateway so.
+    screening: bool
 
     # --- Phase 3 mitigations --------------------------------------------------
     # Scan every answer (cache hits too) for script, SQL, shell and secrets.
@@ -131,6 +134,9 @@ class Settings:
     # --- provider ---------------------------------------------------------
     provider_mode: str
     provider_record: bool
+    # Phase 4 load test: the mock reply waits this long, so a miss costs about
+    # what a real model call does. 0 = answer at once.
+    mock_latency_ms: float
     default_model: str
     openai_api_key: str
     openai_base_url: str
@@ -163,6 +169,7 @@ class Settings:
             cache_strict_threshold=_float("CACHE_STRICT_THRESHOLD", 0.95),
             reverify_score=_float("REVERIFY_SCORE", 0.2),
             reverify_scope=_one_of("REVERIFY_SCOPE", "risky", REVERIFY_SCOPES),
+            screening=_bool("SCREENING", True),
             output_guard=_one_of("OUTPUT_GUARD", "off", OUTPUT_GUARD_MODES),
             rate_limit_rpm=int(_float("RATE_LIMIT_RPM", 0)),
             token_budget_per_day=int(_float("TOKEN_BUDGET_PER_DAY", 0)),
@@ -174,6 +181,7 @@ class Settings:
             allow_cache_seed=_bool("ALLOW_CACHE_SEED", False),
             provider_mode=_one_of("PROVIDER_MODE", "mock", PROVIDER_MODES),
             provider_record=_bool("PROVIDER_RECORD", False),
+            mock_latency_ms=_float("MOCK_LATENCY_MS", 0.0),
             default_model=_str("DEFAULT_MODEL", "gpt-4o-mini"),
             openai_api_key=_str("OPENAI_API_KEY", ""),
             openai_base_url=_str("OPENAI_BASE_URL", "https://api.openai.com/v1"),
@@ -204,6 +212,8 @@ class Settings:
             raise ConfigError(
                 f"INJECTION_THRESHOLD must be between 0 and 1, got {self.injection_threshold}"
             )
+        if self.mock_latency_ms < 0:
+            raise ConfigError(f"MOCK_LATENCY_MS must be 0 or more, got {self.mock_latency_ms}")
         if self.spend_cap_usd_per_day <= 0:
             raise ConfigError("SPEND_CAP_USD_PER_DAY must be greater than 0")
         if self.provider_mode == "live" and not self.openai_api_key:
@@ -230,10 +240,12 @@ class Settings:
             "strict_threshold": self.cache_strict_threshold,
             "reverify_score": self.reverify_score,
             "reverify_scope": self.reverify_scope,
+            "screening": "on" if self.screening else "off",
             "output_guard": self.output_guard,
             "rate_limit_rpm": self.rate_limit_rpm,
             "token_budget_per_day": self.token_budget_per_day,
             "provider_mode": self.provider_mode,
+            "mock_latency_ms": self.mock_latency_ms,
             "build_sha": self.build_sha,
         }
 

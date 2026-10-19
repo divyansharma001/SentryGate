@@ -141,6 +141,23 @@ class Screener:
         )
 
 
+class NoScreener(Screener):
+    """SCREENING=off, for the Phase 4 ablation only.
+
+    Runs no model and no personal-data scan. Every question gets a clean
+    verdict, so the run measures a gateway with no safety check at all.
+    """
+
+    def __init__(self, threshold: float = 0.5):
+        self.scorer = None
+        self.threshold = float(threshold)
+        self.scorer_id = "screening-off"
+
+    def screen(self, prompt: str) -> Verdict:
+        return make_verdict(injection_score=0.0, threshold=self.threshold, has_pii=False, prompt=prompt,
+                            model_versions={"injection": "off", "pii": "off"})
+
+
 def build_screener(settings, scorer=None) -> tuple[Screener, dict]:
     """Build the process-wide screener. Never raises for a missing model.
 
@@ -152,6 +169,9 @@ def build_screener(settings, scorer=None) -> tuple[Screener, dict]:
     started = time.perf_counter()
     mode = getattr(settings, "screening_scorer", "auto")
     threshold = getattr(settings, "injection_threshold", 0.5)
+
+    if not getattr(settings, "screening", True):
+        return NoScreener(threshold), {"mode": "off", "scorer": "screening-off", "load_ms": 0.0}
 
     if scorer is not None:
         return Screener(scorer=scorer, threshold=threshold), {

@@ -51,9 +51,10 @@ def ask(base: str, text: str, log_path: Path) -> dict:
     }
 
 
-def run(base: str, threshold: float, tag: str, out: Path, expect: dict, limit: int | None) -> dict:
+def run(base: str, threshold: float, tag: str, out: Path, expect: dict, limit: int | None,
+        order: str = "cache_first") -> dict:
     controls = load_jsonl(INPUTS / "controls.jsonl")[:limit] if limit else load_jsonl(INPUTS / "controls.jsonl")
-    health = wait_healthy(base, threshold, "cache_first", expect)
+    health = wait_healthy(base, threshold, order, expect)
     gateway_log = health.get("log_path", "/data/requests.jsonl")
     log_path = ROOT / "data" / gateway_log.split("/data/", 1)[-1]
 
@@ -110,9 +111,10 @@ def main() -> int:
     ap.add_argument("--out", default="data/phase3")
     ap.add_argument("--expect", action="append", default=[], metavar="KEY=VALUE")
     ap.add_argument("--limit", type=int, default=None)
+    ap.add_argument("--order", default="cache_first", choices=("cache_first", "screen_first"))
     args = ap.parse_args()
     run(args.base, args.threshold, args.tag, ROOT / args.out,
-        dict(e.split("=", 1) for e in args.expect), args.limit)
+        dict(e.split("=", 1) for e in args.expect), args.limit, args.order)
     return 0
 
 

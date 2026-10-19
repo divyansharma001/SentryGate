@@ -52,6 +52,7 @@ class FlakyProvider(MockProvider):
     """Fails for one model, answers for the rest."""
 
     def __init__(self, broken: str):
+        super().__init__()
         self.broken = broken
 
     def complete(self, request, model):

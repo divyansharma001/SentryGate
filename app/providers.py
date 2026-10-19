@@ -170,8 +170,14 @@ class MockProvider(Provider):
 
     name = "mock"
 
+    def __init__(self, latency_ms: float = 0.0):
+        # The load test sets this so a miss takes as long as a real call.
+        self.latency_s = latency_ms / 1000
+
     def complete(self, request: ChatCompletionRequest, model: str) -> ProviderResult:
         started = time.perf_counter()
+        if self.latency_s:
+            time.sleep(self.latency_s)
         prompt = request.messages[-1].content
         text = f"{MOCK_REPLY} You said: {prompt[:120]}"
         return ProviderResult(
@@ -297,7 +303,7 @@ class OpenAIProvider(Provider):
 
 def build_provider(settings: Settings) -> Provider:
     if settings.provider_mode == "mock":
-        return MockProvider()
+        return MockProvider(settings.mock_latency_ms)
     if settings.provider_mode == "replay":
         return ReplayProvider(settings.cassette_dir)
     ledger = SpendLedger(settings.spend_ledger_path, settings.spend_cap_usd_per_day)

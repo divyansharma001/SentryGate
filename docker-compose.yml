@@ -30,6 +30,8 @@ services:
       # with no .env file at all. Compose reads .env if it is there.
       PROVIDER_MODE: "${PROVIDER_MODE:-mock}"
       PROVIDER_RECORD: "${PROVIDER_RECORD:-off}"
+      # Phase 4 load test: how long a mock reply waits, in ms.
+      MOCK_LATENCY_MS: "${MOCK_LATENCY_MS:-0}"
       OPENAI_API_KEY: "${OPENAI_API_KEY:-}"
       OPENAI_BASE_URL: "${OPENAI_BASE_URL:-https://api.openai.com/v1}"
       DEFAULT_MODEL: "${DEFAULT_MODEL:-gpt-4o-mini}"
@@ -52,6 +54,8 @@ services:
       CACHE_STRICT_THRESHOLD: "${CACHE_STRICT_THRESHOLD:-0.95}"
       REVERIFY_SCORE: "${REVERIFY_SCORE:-0.2}"
       REVERIFY_SCOPE: "${REVERIFY_SCOPE:-risky}"
+      # Phase 4 ablation only: off = no safety check at all.
+      SCREENING: "${SCREENING:-on}"
       INJECTION_THRESHOLD: "${INJECTION_THRESHOLD:-0.5}"
       SCREENING_SCORER: "${SCREENING_SCORER:-auto}"
       EMBED_MODEL: "${EMBED_MODEL:-all-MiniLM-L6-v2}"

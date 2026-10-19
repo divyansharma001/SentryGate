@@ -11,7 +11,7 @@ REDIS_HOST_PORT ?= 6380
 export REDIS_HOST_PORT
 
 .PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze \
-        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx
+        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -122,6 +122,12 @@ defence: attacks-build  ## Run the Phase 3 sweep: five defence arms, both poison
 
 defence-figures: attacks-build  ## Rebuild the Phase 3 table and charts from the results
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.phase3_figures
+
+phase4: attacks-build   ## Run the Phase 4 evaluation: false alarms, ablation, load test (about 2.5 hours)
+	bash attacks/sweep_phase4.sh all
+
+phase4-report: attacks-build  ## Rebuild the Phase 4 tables and charts from the results
+	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.phase4_report
 
 figures: attacks-build  ## Rebuild the table and chart from the results
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.make_figures
