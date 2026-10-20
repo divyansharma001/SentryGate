@@ -76,7 +76,11 @@ run_ablation() {
         echo "Arm $tag:"
         start_gateway "$order" "$scr" "$vf" "$rv" "$scope" "$guard" 0 "phase4/run-$tag.jsonl"
         expect="--expect screening=$scr --expect verdict_filter=$vf --expect reverify=$rv --expect output_guard=$guard"
-        for kind in secret script; do
+        # With the output guard off, what the poison says cannot change whether
+        # it is served, so the script poison would repeat the text-poison run.
+        kinds="secret script"
+        [ "$guard" = "off" ] && kinds="secret"
+        for kind in $kinds; do
             for label in clean attack; do
                 in_attacks python attacks/run_bypass.py --threshold 0.85 --tag "$tag" --order "$order" \
                     --out "$OUT" --poison-label "$label" --poison-kind "$kind" $expect $LIMIT_ARG

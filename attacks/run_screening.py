@@ -4,8 +4,12 @@ Phase 3 saw one false alarm in 100 honest questions. That is too few to say
 anything. Here the filter is asked about a larger, held-out set from the same
 two public datasets:
 
-    honest    every English honest question in deepset (minus our 100
-              controls), plus 1,000 drawn at random from jayavibhav
+    honest    every English honest question in deepset (our 100 controls
+              included: the filter is off the shelf, nothing was tuned on them);
+              1,000 drawn at random from jayavibhav, whose honest texts are
+              synthetic look-alikes full of attack words; and 1,000 everyday
+              instructions from databricks-dolly-15k, the closest of the three
+              to what ordinary users type
     attacks   every English deepset attack (the 239 seeds' deepset half),
               plus 1,000 jayavibhav attacks not used as seeds
 
@@ -38,6 +42,7 @@ from run_bypass import INPUTS, http_json, load_jsonl, wait_healthy  # noqa: E402
 RANDOM_SEED = 20261025
 JAY_HONEST = 1000
 JAY_ATTACKS = 1000
+DOLLY_HONEST = 1000
 
 
 def build_sets() -> list[dict]:
@@ -46,21 +51,33 @@ def build_sets() -> list[dict]:
                + read_rows(download("deepset/prompt-injections", "test")))
     jay = read_rows(download("jayavibhav/prompt-injection", "test"))
     used = {s["text"] for s in load_jsonl(INPUTS / "seeds.jsonl")}
-    used |= {c["text"] for c in load_jsonl(INPUTS / "controls.jsonl")}
 
     rng = random.Random(RANDOM_SEED)
-    deepset_honest = unique([t for t, label in deepset if label == 0 and keep(t) and looks_english(t)
-                             and t not in used])
+    deepset_honest = unique([t for t, label in deepset if label == 0 and keep(t) and looks_english(t)])
     deepset_attacks = unique([t for t, label in deepset if label == 1 and keep(t) and looks_english(t)])
     jay_honest = rng.sample(unique([t for t, label in jay if label == 0 and keep(t) and t not in used]),
                             JAY_HONEST)
     jay_attacks = rng.sample(unique([t for t, label in jay if label == 1 and keep(t) and t not in used]),
                              JAY_ATTACKS)
+    dolly = read_dolly(download_dolly())
+    dolly_honest = rng.sample(unique([t for t in dolly if keep(t)]), DOLLY_HONEST)
     rows = []
     for dataset, label, texts in (("deepset", "honest", deepset_honest), ("deepset", "attack", deepset_attacks),
-                                  ("jayavibhav", "honest", jay_honest), ("jayavibhav", "attack", jay_attacks)):
+                                  ("jayavibhav", "honest", jay_honest), ("jayavibhav", "attack", jay_attacks),
+                                  ("dolly", "honest", dolly_honest)):
         rows += [{"dataset": dataset, "label": label, "text": t} for t in texts]
     return rows
+
+
+def download_dolly() -> Path:
+    """databricks-dolly-15k (CC BY-SA 3.0): 15,000 instructions written by people for ordinary tasks."""
+    return download("databricks/databricks-dolly-15k", "train")
+
+
+def read_dolly(path: Path) -> list[str]:
+    import pyarrow.parquet as pq
+
+    return [str(t).strip() for t in pq.read_table(path, columns=["instruction"]).column("instruction").to_pylist()]
 
 
 def run(base: str, out: Path, limit: int | None) -> dict:
@@ -99,7 +116,7 @@ def run(base: str, out: Path, limit: int | None) -> dict:
         "config": health.get("config"),
         "false_alarms": rate("honest"), "detection": rate("attack"),
         "by_dataset": {d: {"false_alarms": rate("honest", d), "detection": rate("attack", d)}
-                       for d in ("deepset", "jayavibhav")},
+                       for d in ("deepset", "jayavibhav", "dolly")},
     }
     (out / "screening_summary.json").write_text(json.dumps(summary, indent=2))
     fa, det = summary["false_alarms"], summary["detection"]

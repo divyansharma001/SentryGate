@@ -1,0 +1,6 @@
+{
+  "hw_cores": 10,
+  "hw_mem_gb": 24,
+  "docker_cpus": 10,
+  "docker_mem_gb": "7.7"
+}

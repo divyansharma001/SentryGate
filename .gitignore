@@ -32,3 +32,4 @@ package-lock.json
 reports/out/
 reports/team.json
 data/demo/
+paper/journal/build/

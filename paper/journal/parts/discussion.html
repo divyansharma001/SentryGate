@@ -1,0 +1,32 @@
+<h2>7. Discussion</h2>
+
+<h3>7.1 Why a stored verdict is not enough</h3>
+<p>Verdict-tagged caching was designed on the intuition that the filter's decision, once made, can travel with the answer. The results show where that intuition holds and where it breaks. A stored verdict is exactly as good as the moment it was computed. When the filter flagged the original prompt, matching on the stored label removes almost all cache-caused leaks at no measurable cost. When the filter was wrong at storage time, which is precisely how a poisoned answer enters the cache under route (1) of the threat model, the stored label vouches for the poison, and every reworded attack inherits that wrong verdict. Wu, Wang, et al. (2026) report the same weakness from the other side: injection classifiers, including the one we use, often fail to flag poisoning prompts that look benign. A cache cannot repair a verdict it never questions. Only a decision taken on the <i>new</i> prompt, at the time it is served, removes the cache's contribution to the risk.</p>
+
+<p>Restricting that re-check to hits that look risky failed for a related reason. The cheap keyword label is fast because it is shallow, and real injections rarely announce themselves with words like "password" or "execute"; most of our seeds were labelled informational. A selective re-check is therefore only as good as the cheap signal that selects it. The practical rule that follows is simple: re-check every hit.</p>
+
+<h3>7.2 What re-checking every hit costs</h3>
+<p>Re-checking every hit appears to undo the point of a cache, but the measurements show why it does not. A cache exists to avoid the model call, which in our live measurements took a median of {{r_cheap_ms}} ms for the cheap model and {{r_strong_ms}} ms for the strong one and costs money on every call. The re-check adds one classifier pass, about {{recheck_extra_ms}} ms on our hardware, and costs nothing per call. The honest hit rate is unchanged, because an honest prompt that passes the filter on a miss also passes it on a hit. In short, the safe setting trades a few tens of milliseconds per hit for removing the cache's contribution to injection risk, and keeps the saving that matters.</p>
+
+{{discussion_b}}
+
+<h3>7.5 Recommendations for practitioners</h3>
+<ul>
+<li>Treat a semantic cache as part of the attack surface. A cache in front of a safety filter is a path around it.</li>
+<li>Re-run the input filter on every cache hit. It is cheap relative to the model call the cache saves, and it is the only setting we tested that removed every cache-caused leak.</li>
+<li>Store the filter's verdict with every cached answer and filter the vector search on it. On its own it is not sufficient, but it removes known-bad entries at no measurable cost and is the natural place to add further conditions.</li>
+<li>Do not rely on the similarity threshold for safety. The edits that matter most move an embedding least.</li>
+<li>Scan answers, including cached ones, before they leave the gateway. An output check does not depend on the input filter having run.</li>
+<li>Measure the filter's false-alarm rate on your own traffic before relying on it, and report leaks split into those the cache causes and those the filter misses.</li>
+</ul>
+
+<h3>7.6 Threats to validity</h3>
+<ul>
+<li><i>Mocked model replies.</i> The attack experiments mock the model reply, because the attack concerns answers served from the cache, where the model is never called; the filter, embedder and stores are real. The load test models a miss with a fixed delay equal to the measured median of a real call, so it captures queueing effects but not the variance of real provider latency. The model picker was measured on real, paid calls.</li>
+<li><i>One injection route.</i> We model a poisoned answer entering the cache through a prompt that slipped past the filter, and plant it directly. Pre-filled and cross-tenant caches are discussed but not measured.</li>
+<li><i>One filter, one embedder.</i> All results use one public injection classifier and one embedding model. The classifier's model card reports that the project is no longer maintained. Absolute leak and false-alarm rates will differ for other components; the structural result, that a cache in front of a filter bypasses it unless hits are re-checked, does not depend on either.</li>
+<li><i>Dataset provenance.</i> The jayavibhav dataset card documents neither the source of its texts nor the meaning of its labels, and its honest texts are synthetic. We therefore report false alarms on it separately from ordinary text. The deepset card is empty and lists conflicting licences.</li>
+<li><i>Router tuning.</i> The model picker's rules were adjusted once after seeing the 40 router questions, so its agreement with our labels is optimistic; the questions and labels are the authors' own.</li>
+<li><i>One machine.</i> Latency and load were measured on one laptop under Docker Desktop, with other workloads present. Absolute times will differ on server hardware; the comparisons between arms were made on the same machine in the same session.</li>
+<li><i>Output guard.</i> The guard uses plain patterns. It reliably catches the script payload used here, and would miss a payload written to avoid them.</li>
+</ul>

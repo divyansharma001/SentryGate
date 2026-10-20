@@ -1,0 +1,17 @@
+<h3>6.7 The model picker on real calls (E7)</h3>
+<p>Forty questions written by the authors, 20 labelled easy and 20 hard, were each sent twice through the live gateway on OpenRouter: once with the model picker on, choosing between <span class="mono">openai/gpt-4o-mini</span> and <span class="mono">openai/gpt-4o</span>, and once always to the strong model. Costs are computed from the token counts the provider returned (Table 9, Fig. 8). The picker cut the cost of easy questions by {{r_saved_easy}}% and of hard questions by {{r_saved_hard}}%, {{r_saved_all}}% overall, and agreed with the authors' label on {{r_agree}} of {{r_questions}} questions; the one disagreement sent a two-part hard question with no code or mathematics cues to the cheap model, which still answered it correctly. The overall saving is modest because half the set is hard and hard answers are long, so they dominate the bill. Applying the measured average cost of each kind to a mix of 80% or 90% easy traffic projects savings of {{r_mix80}}% and {{r_mix90}}%; these are projections, not measurements. A forced failure of the cheap model was answered by the fallback model with a header naming the failed model.</p>
+
+<div class="tbl">
+<div class="cap"><b>Table 9</b> <i>Cost of 40 real questions (US dollars), model picker against always using the strong model.</i></div>
+<table>
+<tr><th class="l">Questions</th><th>Always strong</th><th>Model picker</th><th>Saved</th></tr>
+<tr><td class="l">Easy (20)</td><td>{{r_easy_strong}}</td><td>{{r_easy_router}}</td><td>{{r_saved_easy}}%</td></tr>
+<tr><td class="l">Hard (20)</td><td>{{r_hard_strong}}</td><td>{{r_hard_router}}</td><td>{{r_saved_hard}}%</td></tr>
+<tr class="em"><td class="l">All (40)</td><td>{{r_cost_strong}}</td><td>{{r_cost_router}}</td><td>{{r_saved_all}}%</td></tr>
+</table>
+</div>
+
+<figure>
+<img src="figures/fig_router.svg" alt="" style="width:90%">
+<figcaption><b>Fig. 8.</b> <i>Cost of the easy and hard halves of the router set, with and without the model picker (live calls).</i></figcaption>
+</figure>

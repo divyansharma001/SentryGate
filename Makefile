@@ -11,7 +11,7 @@ REDIS_HOST_PORT ?= 6380
 export REDIS_HOST_PORT
 
 .PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze \
-        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report
+        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -128,6 +128,14 @@ phase4: attacks-build   ## Run the Phase 4 evaluation: false alarms, ablation, l
 
 phase4-report: attacks-build  ## Rebuild the Phase 4 tables and charts from the results
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.phase4_report
+
+journal-figures: attacks-build  ## Draw every data figure of the journal paper from the result files
+	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python paper/journal/make_figures.py
+
+journal: phase4-report journal-figures  ## Build the journal paper PDF (paper/journal/SentryGate-journal.pdf); needs Chrome
+	@mkdir -p paper/journal/build
+	docker run --rm -v $(CURDIR):/src -w /src sentrygate-gateway python -m pytest --collect-only -q | tail -1 > paper/journal/build/tests.txt
+	python3 paper/journal/build.py
 
 figures: attacks-build  ## Rebuild the table and chart from the results
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.make_figures
