@@ -1,72 +1,63 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 300" font-family="Times New Roman, Times, serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 290" font-family="Times New Roman, Times, serif">
   <defs>
-    <marker id="h" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
+    <marker id="h" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L10,5 L0,9 z" fill="#000"/>
     </marker>
     <style>
-      .dg-t { font-size: 12.5px; font-weight: bold; fill: #1a2b4c; text-anchor: middle; letter-spacing: 0.3px; }
-      .dg-s { font-size: 10.5px; fill: #5f6368; text-anchor: middle; }
-      .dg-blue rect { fill: #e8eefb; stroke: #3b5ba5; }
-      .dg-green rect { fill: #e7f4ea; stroke: #2e7d4f; }
-      .dg-orange rect { fill: #fdf1e4; stroke: #c9771f; }
-      .dg-purple rect { fill: #efe9f8; stroke: #6a4fb3; }
-      .dg-grey rect { fill: #f3f4f6; stroke: #8a8f98; }
-      .dg-box rect, g[class^="dg-"] rect { stroke-width: 1.4; }
-      .dg-arrow { stroke: #444; stroke-width: 1.3; fill: none; marker-end: url(#h); }
+      .dg-box { fill: #fff; stroke: #000; stroke-width: 1; }
+      .dg-t { font-size: 14.5px; fill: #000; text-anchor: middle; }
+      .dg-s { font-size: 12px; fill: #000; text-anchor: middle; font-style: italic; }
+      .dg-arrow { stroke: #000; stroke-width: 1; fill: none; marker-end: url(#h); }
     </style>
   </defs>
 
-  <!-- row 1: inputs, generated once -->
-  <text x="8" y="16" font-size="11px" fill="#5f6368" font-style="italic">Generated once, committed with file hashes</text>
-  <g class="dg-grey"><rect x="8" y="26" width="168" height="62" rx="8"/></g>
-  <text class="dg-t" x="92" y="48">PUBLIC DATASETS</text><text class="dg-s" x="92" y="64">deepset/prompt-injections</text><text class="dg-s" x="92" y="78">jayavibhav/prompt-injection</text>
+  <text x="8" y="14" font-size="12px" font-style="italic">(a) Inputs, generated once</text>
+  <rect class="dg-box" x="8" y="24" width="168" height="54"/>
+  <text class="dg-t" x="92" y="46">Public datasets</text><text class="dg-s" x="92" y="63">deepset, jayavibhav</text>
 
-  <g class="dg-blue"><rect x="208" y="26" width="150" height="62" rx="8"/></g>
-  <text class="dg-t" x="283" y="48">SEEDS</text><text class="dg-s" x="283" y="64">{{n_seeds}} attacks, English,</text><text class="dg-s" x="283" y="78">20 to 400 characters</text>
+  <rect class="dg-box" x="208" y="24" width="150" height="54"/>
+  <text class="dg-t" x="283" y="46">Seeds</text><text class="dg-s" x="283" y="63">{{n_seeds}} attacks</text>
 
-  <g class="dg-blue"><rect x="390" y="26" width="226" height="62" rx="8"/></g>
-  <text class="dg-t" x="503" y="48">VARIANTS</text><text class="dg-s" x="503" y="64">lazy edits {{n_lazy}}, T5 paraphrases {{n_rewrite}}</text><text class="dg-s" x="503" y="78">exact {{n_seeds}} (wiring check)</text>
+  <rect class="dg-box" x="390" y="24" width="226" height="54"/>
+  <text class="dg-t" x="503" y="46">Variants</text><text class="dg-s" x="503" y="63">{{n_lazy}} lazy edits, {{n_rewrite}} paraphrases</text>
 
-  <g class="dg-blue"><rect x="648" y="26" width="160" height="62" rx="8"/></g>
-  <text class="dg-t" x="728" y="48">HONEST CONTROLS</text><text class="dg-s" x="728" y="64">{{n_controls}} questions + their</text><text class="dg-s" x="728" y="78">lazy rewordings</text>
+  <rect class="dg-box" x="648" y="24" width="160" height="54"/>
+  <text class="dg-t" x="728" y="46">Honest controls</text><text class="dg-s" x="728" y="63">{{n_controls}} questions</text>
 
-  <g class="dg-blue"><rect x="840" y="26" width="192" height="62" rx="8"/></g>
-  <text class="dg-t" x="936" y="48">HELD-OUT SETS</text><text class="dg-s" x="936" y="64">{{scr_honest_n}} honest, {{scr_attack_n}}</text><text class="dg-s" x="936" y="78">attacks, for E4</text>
+  <rect class="dg-box" x="840" y="24" width="192" height="54"/>
+  <text class="dg-t" x="936" y="46">Filter test sets (E4)</text><text class="dg-s" x="936" y="63">{{scr_honest_n}} honest, {{scr_attack_n}} attacks</text>
 
-  <path class="dg-arrow" d="M176,57 H206"/>
-  <path class="dg-arrow" d="M358,57 H388"/>
+  <path class="dg-arrow" d="M176,51 H206"/>
+  <path class="dg-arrow" d="M358,51 H388"/>
 
-  <!-- row 2: per arm -->
-  <text x="8" y="128" font-size="11px" fill="#5f6368" font-style="italic">Per experiment arm</text>
-  <g class="dg-orange"><rect x="8" y="138" width="150" height="74" rx="8"/></g>
-  <text class="dg-t" x="83" y="162">RESTART GATEWAY</text><text class="dg-s" x="83" y="178">with the arm's flags;</text><text class="dg-s" x="83" y="192">runner refuses to start if</text><text class="dg-s" x="83" y="205">/healthz config differs</text>
+  <text x="8" y="124" font-size="12px" font-style="italic">(b) Each experiment arm</text>
+  <rect class="dg-box" x="8" y="134" width="150" height="62"/>
+  <text class="dg-t" x="83" y="157">Restart gateway</text><text class="dg-s" x="83" y="174">with the arm's settings;</text><text class="dg-s" x="83" y="188">config checked</text>
 
-  <g class="dg-green"><rect x="190" y="138" width="270" height="74" rx="8"/></g>
-  <text class="dg-t" x="325" y="162">FOR EACH SEED</text>
-  <text class="dg-s" x="325" y="178">clear cache &#8594; plant one poisoned entry</text>
-  <text class="dg-s" x="325" y="192">(saved as clean or as an attack)</text>
-  <text class="dg-s" x="325" y="205">&#8594; send every variant over HTTP</text>
+  <rect class="dg-box" x="190" y="134" width="270" height="62"/>
+  <text class="dg-t" x="325" y="157">For each seed</text>
+  <text class="dg-s" x="325" y="174">clear cache, plant one poisoned entry,</text>
+  <text class="dg-s" x="325" y="188">send every variant over HTTP</text>
 
-  <g class="dg-purple"><rect x="492" y="138" width="166" height="74" rx="8"/></g>
-  <text class="dg-t" x="575" y="162">JOIN</text><text class="dg-s" x="575" y="178">reply body + the gateway's</text><text class="dg-s" x="575" y="192">own log line, matched by</text><text class="dg-s" x="575" y="205">request id</text>
+  <rect class="dg-box" x="492" y="134" width="166" height="62"/>
+  <text class="dg-t" x="575" y="157">Join</text><text class="dg-s" x="575" y="174">reply + gateway log line</text><text class="dg-s" x="575" y="188">by request id</text>
 
-  <g class="dg-purple"><rect x="690" y="138" width="170" height="74" rx="8"/></g>
-  <text class="dg-t" x="775" y="162">CLASSIFY</text><text class="dg-s" x="775" y="178">bypass, poison served,</text><text class="dg-s" x="775" y="192">cache-caused vs filter miss</text><text class="dg-s" x="775" y="205">(join with filter-first run)</text>
+  <rect class="dg-box" x="690" y="134" width="170" height="62"/>
+  <text class="dg-t" x="775" y="157">Classify</text><text class="dg-s" x="775" y="174">bypass, poison served,</text><text class="dg-s" x="775" y="188">cache-caused or filter miss</text>
 
-  <g class="dg-grey"><rect x="892" y="138" width="140" height="74" rx="8"/></g>
-  <text class="dg-t" x="962" y="162">REPORT</text><text class="dg-s" x="962" y="178">seed bootstrap CIs,</text><text class="dg-s" x="962" y="192">report.json, tables,</text><text class="dg-s" x="962" y="205">figures, this PDF</text>
+  <rect class="dg-box" x="892" y="134" width="140" height="62"/>
+  <text class="dg-t" x="962" y="157">Report</text><text class="dg-s" x="962" y="174">bootstrap intervals,</text><text class="dg-s" x="962" y="188">tables and figures</text>
 
-  <path class="dg-arrow" d="M158,175 H188"/>
-  <path class="dg-arrow" d="M460,175 H490"/>
-  <path class="dg-arrow" d="M658,175 H688"/>
-  <path class="dg-arrow" d="M860,175 H890"/>
-  <path class="dg-arrow" d="M503,88 V112 H325 V136"/>
-  <path class="dg-arrow" d="M728,88 V112 H340 V136"/>
+  <path class="dg-arrow" d="M158,165 H188"/>
+  <path class="dg-arrow" d="M460,165 H490"/>
+  <path class="dg-arrow" d="M658,165 H688"/>
+  <path class="dg-arrow" d="M860,165 H890"/>
+  <path class="dg-arrow" d="M503,78 V106 H325 V132"/>
+  <path class="dg-arrow" d="M728,78 V106 H340 V132"/>
 
-  <!-- gateway under test -->
-  <g class="dg-grey"><rect x="190" y="240" width="468" height="44" rx="8"/></g>
-  <text x="424" y="258" font-size="12px" font-weight="bold" fill="#1a2b4c" text-anchor="middle">GATEWAY UNDER TEST</text>
-  <text x="424" y="274" font-size="10.5px" fill="#5f6368" text-anchor="middle">real DeBERTa-v3 filter, MiniLM embedder, Qdrant, Redis; mock model reply</text>
-  <path class="dg-arrow" d="M325,212 V238"/>
-  <path class="dg-arrow" d="M575,238 V214"/>
+  <rect class="dg-box" x="190" y="232" width="468" height="44"/>
+  <text class="dg-t" x="424" y="251">Gateway under test</text>
+  <text class="dg-s" x="424" y="267">real injection filter, embedder, Qdrant and Redis; mocked model reply</text>
+  <path class="dg-arrow" d="M325,196 V230"/>
+  <path class="dg-arrow" d="M575,230 V198"/>
 </svg>

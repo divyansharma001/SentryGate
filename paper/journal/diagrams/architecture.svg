@@ -1,95 +1,81 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 372" font-family="Times New Roman, Times, serif">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1040 360" font-family="Times New Roman, Times, serif">
   <defs>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#444"/>
-    </marker>
-    <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-      <path d="M0,0 L10,5 L0,10 z" fill="#b23a2e"/>
+    <marker id="a" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,1 L10,5 L0,9 z" fill="#000"/>
     </marker>
     <style>
-      .dg-t { font-size: 12.5px; font-weight: bold; fill: #1a2b4c; text-anchor: middle; letter-spacing: 0.3px; }
-      .dg-s { font-size: 10.5px; fill: #5f6368; text-anchor: middle; }
-      .dg-l { font-size: 11px; fill: #333; font-style: italic; }
-      .dg-blue rect { fill: #e8eefb; stroke: #3b5ba5; }
-      .dg-green rect { fill: #e7f4ea; stroke: #2e7d4f; }
-      .dg-orange rect { fill: #fdf1e4; stroke: #c9771f; }
-      .dg-purple rect { fill: #efe9f8; stroke: #6a4fb3; }
-      .dg-grey rect { fill: #f3f4f6; stroke: #8a8f98; }
-      .dg-box rect, g[class^="dg-"] rect { stroke-width: 1.4; }
-      .dg-arrow { stroke: #444; stroke-width: 1.3; fill: none; marker-end: url(#a); }
+      .dg-box { fill: #fff; stroke: #000; stroke-width: 1; }
+      .dg-t { font-size: 14.5px; fill: #000; text-anchor: middle; }
+      .dg-s { font-size: 12px; fill: #000; text-anchor: middle; font-style: italic; }
+      .dg-l { font-size: 12px; fill: #000; font-style: italic; }
+      .dg-arrow { stroke: #000; stroke-width: 1; fill: none; marker-end: url(#a); }
     </style>
   </defs>
 
-  <!-- main row -->
-  <g class="dg-grey"><rect x="8" y="140" width="96" height="60" rx="8"/></g>
-  <text class="dg-t" x="56" y="166">CLIENT APP</text><text class="dg-s" x="56" y="182">OpenAI SDK</text>
+  <!-- request path -->
+  <rect class="dg-box" x="8" y="146" width="92" height="48"/>
+  <text class="dg-t" x="54" y="168">Client</text><text class="dg-s" x="54" y="184">application</text>
 
-  <g class="dg-grey"><rect x="124" y="140" width="86" height="60" rx="8"/></g>
-  <text class="dg-t" x="167" y="166">NGINX</text><text class="dg-s" x="167" y="182">reverse proxy</text>
+  <rect class="dg-box" x="122" y="146" width="84" height="48"/>
+  <text class="dg-t" x="164" y="168">nginx</text><text class="dg-s" x="164" y="184">reverse proxy</text>
 
-  <g class="dg-green"><rect x="230" y="140" width="104" height="60" rx="8"/></g>
-  <text class="dg-t" x="282" y="162">RATE LIMIT</text><text class="dg-s" x="282" y="177">per caller, Redis</text><text class="dg-s" x="282" y="190">req/min, tokens/day</text>
+  <rect class="dg-box" x="228" y="146" width="100" height="48"/>
+  <text class="dg-t" x="278" y="168">Rate limiter</text><text class="dg-s" x="278" y="184">per caller</text>
 
-  <g class="dg-blue"><rect x="350" y="140" width="110" height="60" rx="8"/></g>
-  <text class="dg-t" x="405" y="162">CHEAP LABEL</text><text class="dg-s" x="405" y="177">keyword rules</text><text class="dg-s" x="405" y="190">no model, &#181;s</text>
+  <rect class="dg-box" x="350" y="146" width="104" height="48"/>
+  <text class="dg-t" x="402" y="168">Cheap label</text><text class="dg-s" x="402" y="184">keyword rules</text>
 
-  <g class="dg-blue"><rect x="474" y="128" width="164" height="84" rx="8"/></g>
-  <text class="dg-t" x="556" y="150">CACHE LOOKUP</text>
-  <text class="dg-s" x="556" y="166">Redis exact match, then</text>
-  <text class="dg-s" x="556" y="179">Qdrant vector search filtered on</text>
-  <text class="dg-s" x="556" y="192">stored verdict and label,</text>
-  <text class="dg-s" x="556" y="205">&#964; = 0.85 (0.95 if risky)</text>
+  <rect class="dg-box" x="476" y="138" width="154" height="64"/>
+  <text class="dg-t" x="553" y="160">Cache lookup</text>
+  <text class="dg-s" x="553" y="176">filtered on stored verdict</text>
+  <text class="dg-s" x="553" y="191">and label; &#964; = 0.85 / 0.95</text>
 
-  <!-- hit row -->
-  <g class="dg-green"><rect x="672" y="26" width="132" height="60" rx="8"/></g>
-  <text class="dg-t" x="738" y="48">RE-CHECK HIT</text><text class="dg-s" x="738" y="63">DeBERTa-v3 filter</text><text class="dg-s" x="738" y="76">block if s &#8805; 0.5</text>
-
-  <g class="dg-green"><rect x="824" y="26" width="104" height="60" rx="8"/></g>
-  <text class="dg-t" x="876" y="48">OUTPUT</text><text class="dg-t" x="876" y="62">GUARD</text><text class="dg-s" x="876" y="77">script, SQL, shell, key</text>
-
-  <!-- answer -->
-  <g class="dg-purple"><rect x="954" y="140" width="80" height="60" rx="8"/></g>
-  <text class="dg-t" x="994" y="166">ANSWER</text><text class="dg-s" x="994" y="182">to client</text>
-
-  <!-- miss row -->
-  <g class="dg-green"><rect x="474" y="254" width="112" height="60" rx="8"/></g>
-  <text class="dg-t" x="530" y="276">SAFETY FILTER</text><text class="dg-s" x="530" y="291">DeBERTa-v3 injection</text><text class="dg-s" x="530" y="304">+ Presidio personal data</text>
-
-  <g class="dg-orange"><rect x="600" y="254" width="88" height="60" rx="8"/></g>
-  <text class="dg-t" x="644" y="276">MODEL</text><text class="dg-t" x="644" y="290">PICKER</text><text class="dg-s" x="644" y="304">cheap / strong</text>
-
-  <g class="dg-orange"><rect x="702" y="254" width="96" height="60" rx="8"/></g>
-  <text class="dg-t" x="750" y="276">PROVIDER</text><text class="dg-s" x="750" y="291">OpenRouter,</text><text class="dg-s" x="750" y="304">fallback once</text>
-
-  <g class="dg-green"><rect x="812" y="254" width="70" height="60" rx="8"/></g>
-  <text class="dg-t" x="847" y="276">OUTPUT</text><text class="dg-t" x="847" y="290">GUARD</text>
-
-  <g class="dg-blue"><rect x="896" y="254" width="138" height="60" rx="8"/></g>
-  <text class="dg-t" x="965" y="276">STORE</text><text class="dg-s" x="965" y="291">answer + verdict + label</text><text class="dg-s" x="965" y="304">into Redis and Qdrant</text>
-
-  <!-- arrows, main row -->
-  <path class="dg-arrow" d="M104,170 H122"/>
-  <path class="dg-arrow" d="M210,170 H228"/>
-  <path class="dg-arrow" d="M334,170 H348"/>
-  <path class="dg-arrow" d="M460,170 H472"/>
   <!-- hit -->
-  <path class="dg-arrow" d="M610,128 V56 H670"/>
-  <text class="dg-l" x="618" y="48">hit</text>
-  <path class="dg-arrow" d="M804,56 H822"/>
-  <path class="dg-arrow" d="M928,56 H994 V138"/>
+  <rect class="dg-box" x="672" y="34" width="124" height="48"/>
+  <text class="dg-t" x="734" y="56">Re-check</text><text class="dg-s" x="734" y="72">injection filter</text>
+
+  <rect class="dg-box" x="818" y="34" width="104" height="48"/>
+  <text class="dg-t" x="870" y="56">Output guard</text><text class="dg-s" x="870" y="72">pattern scan</text>
+
+  <rect class="dg-box" x="950" y="146" width="84" height="48"/>
+  <text class="dg-t" x="992" y="168">Response</text><text class="dg-s" x="992" y="184">to client</text>
+
   <!-- miss -->
-  <path class="dg-arrow" d="M530,212 V252"/>
-  <text class="dg-l" x="538" y="236">miss</text>
-  <path class="dg-arrow" d="M586,284 H598"/>
-  <path class="dg-arrow" d="M688,284 H700"/>
-  <path class="dg-arrow" d="M798,284 H810"/>
-  <path class="dg-arrow" d="M882,284 H894"/>
-  <path class="dg-arrow" d="M994,254 V202"/>
-  <!-- baseline bypass -->
-  <path d="M638,170 H952" stroke="#b23a2e" stroke-width="1.6" stroke-dasharray="6 4" fill="none" marker-end="url(#ar)"/>
-  <text x="795" y="160" font-size="11px" fill="#b23a2e" text-anchor="middle" font-style="italic">baseline hit: served without screening (the bypass)</text>
+  <rect class="dg-box" x="476" y="262" width="110" height="48"/>
+  <text class="dg-t" x="531" y="284">Injection filter</text><text class="dg-s" x="531" y="300">+ PII scan</text>
+
+  <rect class="dg-box" x="600" y="262" width="96" height="48"/>
+  <text class="dg-t" x="648" y="284">Model picker</text><text class="dg-s" x="648" y="300">cheap / strong</text>
+
+  <rect class="dg-box" x="710" y="262" width="100" height="48"/>
+  <text class="dg-t" x="760" y="284">LLM provider</text><text class="dg-s" x="760" y="300">with fallback</text>
+
+  <rect class="dg-box" x="824" y="262" width="96" height="48"/>
+  <text class="dg-t" x="872" y="284">Output guard</text><text class="dg-s" x="872" y="300">pattern scan</text>
+
+  <rect class="dg-box" x="934" y="262" width="100" height="48"/>
+  <text class="dg-t" x="984" y="284">Store entry</text><text class="dg-s" x="984" y="300">answer + verdict</text>
+
+  <!-- arrows -->
+  <path class="dg-arrow" d="M100,170 H120"/>
+  <path class="dg-arrow" d="M206,170 H226"/>
+  <path class="dg-arrow" d="M328,170 H348"/>
+  <path class="dg-arrow" d="M454,170 H474"/>
+  <path class="dg-arrow" d="M610,138 V58 H670"/>
+  <text class="dg-l" x="618" y="50">hit</text>
+  <path class="dg-arrow" d="M796,58 H816"/>
+  <path class="dg-arrow" d="M922,58 H992 V144"/>
+  <path class="dg-arrow" d="M531,202 V260"/>
+  <text class="dg-l" x="539" y="236">miss</text>
+  <path class="dg-arrow" d="M586,286 H598"/>
+  <path class="dg-arrow" d="M696,286 H708"/>
+  <path class="dg-arrow" d="M810,286 H822"/>
+  <path class="dg-arrow" d="M920,286 H932"/>
+  <path class="dg-arrow" d="M984,262 V196"/>
+  <path d="M630,170 H946" stroke="#000" stroke-width="1" stroke-dasharray="5 4" fill="none" marker-end="url(#a)"/>
+  <text class="dg-l" x="788" y="161" text-anchor="middle">baseline: hit served without screening</text>
 
   <!-- log -->
-  <g class="dg-grey"><rect x="124" y="334" width="910" height="32" rx="6"/></g>
-  <text x="579" y="354" font-size="11px" fill="#333" text-anchor="middle"><tspan font-weight="bold" fill="#1a2b4c">REQUEST LOG:</tspan>  one JSON line per request: outcome, stage timings, tokens and cost, whether screening ran, full config and code version</text>
+  <rect class="dg-box" x="122" y="326" width="912" height="28"/>
+  <text x="578" y="345" font-size="12px" text-anchor="middle">Request log: one JSON line per request (outcome, stage timings, cost, whether screening ran, configuration)</text>
 </svg>
