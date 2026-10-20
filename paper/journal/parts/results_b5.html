@@ -1,0 +1,22 @@
+<h3>6.4 The filter alone (E4)</h3>
+<p>Every defence in this paper ends by asking the same filter, so its own error rates bound what any configuration can achieve. E4 asks it about texts it was not tuned on (Table 6, Fig. 5). On ordinary honest text, the deepset honest questions and 1,000 everyday instructions from Dolly-15k (Databricks, 2023), it raised {{scr_fa_ord_k}} false alarm in {{scr_fa_ord_n}} texts ({{scr_fa_ord}}%, 95% CI {{scr_fa_ord_ci}}). On the jayavibhav honest texts, which are synthetic sentences dense with injection vocabulary ("disregard", "start from scratch", "pre-beginning"), it blocked {{scr_fa_look}}% ({{scr_fa_look_ci}}). These two numbers describe different things and should not be pooled: the first estimates the cost to ordinary users, the second the filter's robustness to deliberately confusing look-alikes, which is poor.</p>
+
+<p>On attacks, the filter caught {{scr_det}}% overall ({{scr_det_ci}}), but the figure hides a large split between sources: {{scr_jayavibhav_det}}% of jayavibhav attacks against only {{scr_deepset_det}}% of deepset attacks, which are conversational and often lack the trigger phrases the classifier keys on. The same split appeared in E2. The score is strongly bimodal (Fig. 5a), so moving the block threshold changes little: from 0.1 to 0.9, detection moves only from {{scr_curve_det_01}}% to {{scr_curve_det_09}}% and look-alike false alarms from {{scr_curve_fa_look_01}}% to {{scr_curve_fa_look_09}}% (Fig. 5b). No threshold rescues the look-alike case. The area under the catch/false-alarm curve is {{scr_auc_ord}} against ordinary text but only {{scr_auc_look}} against look-alikes.</p>
+
+<div class="tbl">
+<div class="cap"><b>Table 6</b> <i>The filter alone at its default threshold of 0.5 (E4). Wilson 95% intervals.</i></div>
+<table class="ci">
+<tr><th class="l">Texts</th><th>n</th><th>Blocked (%)</th><th>95% CI</th></tr>
+<tr><td class="l">Honest: deepset</td><td>{{scr_deepset_fa_n}}</td><td>{{scr_deepset_fa}}</td><td>{{scr_deepset_fa_ci}}</td></tr>
+<tr><td class="l">Honest: Dolly-15k</td><td>{{scr_dolly_fa_n}}</td><td>{{scr_dolly_fa}}</td><td>{{scr_dolly_fa_ci}}</td></tr>
+<tr class="em"><td class="l">Honest, ordinary (both)</td><td>{{scr_fa_ord_n}}</td><td>{{scr_fa_ord}}</td><td>{{scr_fa_ord_ci}}</td></tr>
+<tr><td class="l">Honest, look-alike: jayavibhav</td><td>{{scr_fa_look_n}}</td><td>{{scr_fa_look}}</td><td>{{scr_fa_look_ci}}</td></tr>
+<tr><td class="l">Attacks: deepset</td><td>{{scr_deepset_det_n}}</td><td>{{scr_deepset_det}}</td><td>{{scr_deepset_det_ci}}</td></tr>
+<tr><td class="l">Attacks: jayavibhav</td><td>{{scr_jayavibhav_det_n}}</td><td>{{scr_jayavibhav_det}}</td><td>{{scr_jayavibhav_det_ci}}</td></tr>
+</table>
+</div>
+
+<figure class="span">
+<img src="figures/fig_filter_alone.svg" alt="">
+<figcaption><b>Fig. 5.</b> <i>The filter alone. (a) Injection scores, as a share of each set. (b) Attacks caught against honest texts blocked as the block threshold varies, separately for ordinary and look-alike honest text.</i></figcaption>
+</figure>

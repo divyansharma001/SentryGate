@@ -106,7 +106,7 @@ def values() -> dict[str, str]:
 
     v["n_seeds_risky"] = str(sum(1 for s in seeds if classify_intent(s["text"]) in ("credentials", "tool_use", "pii")))
     v["w4_confirmed"] = thousands(w4["confirmed_bypasses_have_zero_screening"])
-    v["w4_exact"] = w4["exact_served"].replace("/", " of ")
+    v["w4_exact"] = " of ".join(thousands(int(x)) for x in w4["exact_served"].split("/"))
     v["w4_controls"] = w4["control_served_poison"].replace("/", " of ")
     v["w4_mismatch"] = str(w4["score_hit_mismatches"])
 
@@ -143,11 +143,30 @@ def values() -> dict[str, str]:
     v["r_strong_ms"] = thousands(router["model_ms_p50"]["strong"])
     v["r_mix80"] = f"{router['projected_saving_by_mix']['80% easy']:.0f}"
     v["r_mix90"] = f"{router['projected_saving_by_mix']['90% easy']:.0f}"
-    v["r_cost_router"] = f"{router['router_cost_usd']:.4f}"
-    v["r_cost_strong"] = f"{router['strong_cost_usd']:.4f}"
+    v["r_cost_router"] = f"{router['router_cost_usd']:.5f}"
+    v["r_cost_strong"] = f"{router['strong_cost_usd']:.5f}"
     for lab in ("easy", "hard"):
         for arm in ("router", "strong"):
             v[f"r_{lab}_{arm}"] = f"{router['cost_by_label'][lab][arm]:.5f}"
+
+    # The output guard and rate limiter, from the recorded Phase 3 demonstration.
+    demo = (ROOT / "data" / "mitigations" / "demo.txt").read_text()
+
+    def grab(pattern: str) -> str:
+        m = re.search(pattern, demo)
+        if not m:
+            raise SystemExit(f"data/mitigations/demo.txt has no line matching {pattern!r}")
+        return m.group(1)
+
+    v["mit_sent"] = grab(r"attacker sent (\d+) requests")
+    v["mit_limit"] = grab(r"limit (\d+) a minute")
+    v["mit_answered"] = grab(r"200 answered: (\d+)")
+    v["mit_blocked"] = grab(r"403 blocked by the filter: (\d+)")
+    v["mit_refused"] = grab(r"429 refused, rate limit: (\d+)")
+    v["mit_poison"] = grab(r"poisoned answers the attacker got: (\d+)")
+    v["mit_other"] = grab(r"honest caller at the same moment: status (\d+)")
+    for mode in ("off", "flag", "block"):
+        v[f"mit_guard_{mode}"] = grab(rf"OUTPUT_GUARD={mode}, a user asks a reworded question:\n\s+(\d+)")
 
     # Phase 4: filled in only once the runs exist.
     v.update(phase4_values(p4))
@@ -157,7 +176,6 @@ def values() -> dict[str, str]:
     v["torch_version"] = torch_pin()
     v["st_version"] = pin("requirements-gateway.txt", "sentence-transformers")
     v["qdrant_version"] = re.search(r"qdrant/qdrant:v([0-9.]+)", (ROOT / "docker-compose.yml").read_text()).group(1)
-    v["locust_version"] = pin("requirements-attacks.txt", "locust")
     v["n_tests"] = str(count_tests())
     return v
 

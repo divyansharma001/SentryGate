@@ -17,6 +17,6 @@
 <tr><td class="l">Wu, Ying, et al. (2026)</td><td class="l">vLLM, SGLang, GPTCache</td><td class="l">Six cache attacks; a hash collision lets content inherit a benign moderation result</td><td class="l">Salted keys, verification</td></tr>
 <tr><td class="l">Zhang, Liu, et al. (2026)</td><td class="l">GPTCache, cloud caches</td><td class="l">Black-box key collisions hijack responses (about 86% hit rate)</td><td class="l">Salting, isolation, perplexity</td></tr>
 <tr><td class="l">Zhang, Yao, et al. (2026)</td><td class="l">GPTCache</td><td class="l">Similarity is not validity</td><td class="l">Re-check every hit for answer validity</td></tr>
-<tr class="em"><td class="l">This study</td><td class="l">Gateway: cache in front of a separate input filter</td><td class="l">Hits skip the filter; measured from the gateway's own logs, with leaks split into cache-caused and filter misses</td><td class="l">Verdict-tagged lookup, re-check every hit, ablation and load cost</td></tr>
+<tr class="em"><td class="l">This study</td><td class="l">Gateway: cache in front of a separate input filter</td><td class="l">Hits skip the filter; measured from the gateway's own logs, with leaks split into cache-caused and filter misses</td><td class="l">Verdict-tagged lookup, re-check every hit, cost to honest traffic</td></tr>
 </table>
 </div>

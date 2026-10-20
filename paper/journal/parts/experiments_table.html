@@ -3,8 +3,6 @@
 <tr><td>E1</td><td class="l">Does the cache serve poison to reworded attacks without screening?</td><td class="l">Cache-first, &tau; from 0.95 down to 0.65</td><td class="l">{{n_variants}} variants per &tau;, 7 values</td></tr>
 <tr><td>E2</td><td class="l">Is the order the cause? What does the filter block when asked?</td><td class="l">Filter-first, &tau; = 0.85</td><td class="l">{{n_variants}}</td></tr>
 <tr><td>E3</td><td class="l">Which parts of verdict-tagged caching stop the leak, and at what cost?</td><td class="l">5 settings &times; poison saved as clean / attack, plus honest traffic</td><td class="l">{{n_variants}} per cell</td></tr>
-<tr><td>E4</td><td class="l">What does each layer add? (ablation)</td><td class="l">Full system, each layer off in turn, no defence, filter-first &times; 2 labels &times; text / script poison</td><td class="l">{{n_variants}} per cell, 28 cells</td></tr>
-<tr><td>E5</td><td class="l">How often does the filter block honest text, and catch attacks, on data it was not tuned on?</td><td class="l">Filter-first, filter alone</td><td class="l">{{scr_honest_n}} honest + {{scr_attack_n}} attacks</td></tr>
-<tr><td>E6</td><td class="l">What does the defence cost under concurrent load?</td><td class="l">No defence vs full defence &times; 1 to {{load_max_users}} users; Locust {{locust_version}}; 1,900 ms model delay</td><td class="l">60 s per step</td></tr>
-<tr><td>E7</td><td class="l">Does the model picker save money on real calls?</td><td class="l">Picker vs always-strong, live OpenRouter</td><td class="l">80 paid calls</td></tr>
+<tr><td>E4</td><td class="l">How often does the filter block honest text, and catch attacks, on data it was not tuned on?</td><td class="l">Filter-first, filter alone</td><td class="l">{{scr_honest_n}} honest + {{scr_attack_n}} attacks</td></tr>
+<tr><td>E5</td><td class="l">Does the model picker save money on real calls?</td><td class="l">Picker vs always-strong, live OpenRouter</td><td class="l">80 paid calls</td></tr>
 </table>

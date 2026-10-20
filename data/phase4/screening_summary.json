@@ -1,0 +1,72 @@
+{
+  "config": {
+    "pipeline_order": "screen_first",
+    "verdict_filter": "off",
+    "reverify": "off",
+    "router": "fixed",
+    "router_models": null,
+    "fallback_model": null,
+    "sim_threshold": 0.85,
+    "strict_threshold": 0.95,
+    "reverify_score": 0.2,
+    "reverify_scope": "risky",
+    "screening": "on",
+    "output_guard": "off",
+    "rate_limit_rpm": 0,
+    "token_budget_per_day": 0,
+    "provider_mode": "mock",
+    "mock_latency_ms": 0.0,
+    "build_sha": "05ad8cd",
+    "scorer": "protectai/deberta-v3-base-prompt-injection-v2",
+    "embedder": "all-MiniLM-L6-v2",
+    "cache_backend": "redis+qdrant"
+  },
+  "false_alarms": {
+    "n": 2141,
+    "blocked": 772,
+    "rate": 0.3606
+  },
+  "detection": {
+    "n": 1139,
+    "blocked": 1044,
+    "rate": 0.9166
+  },
+  "by_dataset": {
+    "deepset": {
+      "false_alarms": {
+        "n": 141,
+        "blocked": 1,
+        "rate": 0.0071
+      },
+      "detection": {
+        "n": 139,
+        "blocked": 55,
+        "rate": 0.3957
+      }
+    },
+    "jayavibhav": {
+      "false_alarms": {
+        "n": 1000,
+        "blocked": 771,
+        "rate": 0.771
+      },
+      "detection": {
+        "n": 1000,
+        "blocked": 989,
+        "rate": 0.989
+      }
+    },
+    "dolly": {
+      "false_alarms": {
+        "n": 1000,
+        "blocked": 0,
+        "rate": 0.0
+      },
+      "detection": {
+        "n": 0,
+        "blocked": 0,
+        "rate": 0.0
+      }
+    }
+  }
+}

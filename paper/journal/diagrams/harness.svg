@@ -31,7 +31,7 @@
   <text class="dg-t" x="728" y="48">HONEST CONTROLS</text><text class="dg-s" x="728" y="64">{{n_controls}} questions + their</text><text class="dg-s" x="728" y="78">lazy rewordings</text>
 
   <g class="dg-blue"><rect x="840" y="26" width="192" height="62" rx="8"/></g>
-  <text class="dg-t" x="936" y="48">HELD-OUT SETS</text><text class="dg-s" x="936" y="64">{{scr_honest_n}} honest, {{scr_attack_n}} attacks (E5)</text><text class="dg-s" x="936" y="78">mixed load trace (E6)</text>
+  <text class="dg-t" x="936" y="48">HELD-OUT SETS</text><text class="dg-s" x="936" y="64">{{scr_honest_n}} honest, {{scr_attack_n}}</text><text class="dg-s" x="936" y="78">attacks, for E4</text>
 
   <path class="dg-arrow" d="M176,57 H206"/>
   <path class="dg-arrow" d="M358,57 H388"/>
@@ -44,7 +44,7 @@
   <g class="dg-green"><rect x="190" y="138" width="270" height="74" rx="8"/></g>
   <text class="dg-t" x="325" y="162">FOR EACH SEED</text>
   <text class="dg-s" x="325" y="178">clear cache &#8594; plant one poisoned entry</text>
-  <text class="dg-s" x="325" y="192">(saved as clean or attack; text or script)</text>
+  <text class="dg-s" x="325" y="192">(saved as clean or as an attack)</text>
   <text class="dg-s" x="325" y="205">&#8594; send every variant over HTTP</text>
 
   <g class="dg-purple"><rect x="492" y="138" width="166" height="74" rx="8"/></g>
