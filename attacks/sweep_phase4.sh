@@ -9,7 +9,7 @@
 #               nginx, for the open baseline and the full defence
 #
 # Real models, PROVIDER_MODE=mock (no money spent), HF_HUB_OFFLINE=1.
-# The gateway is capped at GATEWAY_CPUS cores (default 3) for every arm.
+# The gateway is capped at GATEWAY_CPUS cores (default 2) for every arm.
 # The load test sets MOCK_LATENCY_MS=1900, the measured median of a real
 # cheap-model answer (data/router/report.json), so a miss takes as long as one.
 #
@@ -28,7 +28,7 @@ LOAD_USERS="${LOAD_USERS:-1 5 10 25 50}"
 LOAD_SECONDS="${LOAD_SECONDS:-60}"
 # Cores the gateway may use. Kept low so the laptop running the sweep stays
 # usable; every arm and the load test get the same cap, so they compare fairly.
-GATEWAY_CPUS="${GATEWAY_CPUS:-3}"
+GATEWAY_CPUS="${GATEWAY_CPUS:-2}"
 
 export BUILD_SHA PROVIDER_MODE=mock PROVIDER_RECORD=off SIM_THRESHOLD=0.85 \
        CACHE_STRICT_THRESHOLD=0.95 REVERIFY_SCORE=0.2 INJECTION_THRESHOLD=0.5 \
