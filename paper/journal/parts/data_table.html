@@ -1,11 +1,11 @@
 <table>
-<tr><th class="l">Set</th><th>Source</th><th>Size</th><th class="l">Used in</th></tr>
-<tr><td class="l">Attack seeds</td><td>deepset (all English) + jayavibhav (random)</td><td>{{n_seeds_deepset}} + {{n_seeds_jay}} = {{n_seeds}}</td><td class="l">E1&ndash;E3</td></tr>
-<tr><td class="l">Lazy edits</td><td>9 fixed rules per seed, duplicates removed</td><td>{{n_lazy}}</td><td class="l">E1&ndash;E3</td></tr>
-<tr><td class="l">Full paraphrases</td><td>T5 paraphraser, beam search, 3 per seed</td><td>{{n_rewrite}}</td><td class="l">E1&ndash;E3</td></tr>
-<tr><td class="l">Honest controls</td><td>deepset honest, English, random</td><td>{{n_controls}}</td><td class="l">E1&ndash;E3 (checks, honest hit rate)</td></tr>
-<tr><td class="l">Honest, ordinary</td><td>deepset honest (all English) + Dolly-15k instructions (random)</td><td>{{scr_deepset_fa_n}} + {{scr_dolly_fa_n}}</td><td class="l">E4</td></tr>
-<tr><td class="l">Honest, look-alike</td><td>jayavibhav honest (random): synthetic text full of attack words</td><td>{{scr_jayavibhav_fa_n}}</td><td class="l">E4</td></tr>
-<tr><td class="l">Attacks</td><td>deepset attacks + jayavibhav attacks not used as seeds</td><td>{{scr_deepset_det_n}} + {{scr_jayavibhav_det_n}}</td><td class="l">E4</td></tr>
-<tr><td class="l">Router questions</td><td>written by the authors, labelled easy or hard</td><td>20 + 20</td><td class="l">E5</td></tr>
+<tr><th class="l">Set</th><th class="l">Source</th><th>Size</th><th class="l">Used in</th></tr>
+<tr><td class="l">Attack seeds</td><td class="l">deepset (all English) + jayavibhav (random)</td><td>{{n_seeds_deepset}} + {{n_seeds_jay}} = {{n_seeds}}</td><td class="l">E1&ndash;E3</td></tr>
+<tr><td class="l">Lazy edits</td><td class="l">9 fixed rules per seed, duplicates removed</td><td>{{n_lazy}}</td><td class="l">E1&ndash;E3</td></tr>
+<tr><td class="l">Full paraphrases</td><td class="l">T5 paraphraser, beam search, 3 per seed</td><td>{{n_rewrite}}</td><td class="l">E1&ndash;E3</td></tr>
+<tr><td class="l">Honest controls</td><td class="l">deepset honest, English, random</td><td>{{n_controls}}</td><td class="l">E1&ndash;E3 (checks, honest hit rate)</td></tr>
+<tr><td class="l">Honest, ordinary</td><td class="l">deepset honest (all English) + Dolly-15k instructions (random)</td><td>{{scr_deepset_fa_n}} + {{scr_dolly_fa_n}}</td><td class="l">E4</td></tr>
+<tr><td class="l">Honest, look-alike</td><td class="l">jayavibhav honest (random): synthetic text full of attack words</td><td>{{scr_jayavibhav_fa_n}}</td><td class="l">E4</td></tr>
+<tr><td class="l">Attacks</td><td class="l">deepset attacks + jayavibhav attacks not used as seeds</td><td>{{scr_deepset_det_n}} + {{scr_jayavibhav_det_n}}</td><td class="l">E4</td></tr>
+<tr><td class="l">Router questions</td><td class="l">written by the authors, labelled easy or hard</td><td>20 + 20</td><td class="l">E5</td></tr>
 </table>

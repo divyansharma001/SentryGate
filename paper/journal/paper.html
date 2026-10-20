@@ -51,12 +51,16 @@ tr { break-inside: avoid; }
 .tbl .cap { margin: 0 0 4pt; }
 .cap b, figcaption b { font-style: normal; }
 .cap i, figcaption i { font-style: italic; }
-table { width: 100%; border-collapse: collapse; font-size: 8.4pt; line-height: 1.25; }
-th, td { border: 0.5pt solid #555; padding: 3pt 5pt; vertical-align: top; }
-th { background: #dce4f2; font-weight: bold; text-align: center; }
+table { width: 100%; border-collapse: collapse; font-size: 8.4pt; line-height: 1.25;
+        border-top: 1.1pt solid #000; border-bottom: 1.1pt solid #000; }
+th, td { border: 0; padding: 2.6pt 6pt; vertical-align: top; }
+th { font-weight: normal; text-align: center; border-bottom: 0.6pt solid #000; padding-top: 3.5pt; padding-bottom: 3.5pt; }
 td { text-align: center; }
 td.l, th.l { text-align: left; }
-tr.em td { font-weight: bold; }
+tr:nth-child(2) td { padding-top: 4pt; }
+tr:last-child td { padding-bottom: 4pt; }
+tr.em td { border-top: 0.6pt solid #000; padding-top: 4pt; }
+tr.best td { font-weight: bold; }
 figure { margin: 8pt 0 10pt; break-inside: avoid; text-align: center; }
 figure img, figure svg { width: 100%; height: auto; display: block; margin: 0 auto; }
 figure figcaption { text-align: center; margin-top: 5pt; padding: 0 4pt; }
