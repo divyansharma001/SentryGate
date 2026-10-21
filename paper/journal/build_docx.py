@@ -1,13 +1,16 @@
-"""Build the Word version of the journal paper: paper/journal/SentryGate-journal.docx.
+"""Build the Word manuscript of the paper: paper/journal/SentryGate-journal.docx.
 
 Reads the finished page that build.py writes (build/paper.html), so the Word
 file says exactly what the PDF says: same text, same numbers, same tables.
 It never adds words of its own.
 
-Layout follows the PDF: title block and abstract across the page, body in two
-Word columns, wide tables and figures across the page (Word continuous
-section breaks), plain journal tables (top and bottom rules, a thin rule under
-the header), running header and page numbers.
+The layout is the one journals ask for in a Word submission, not the
+two-column look of the PDF (the publisher typesets that after acceptance):
+single column, A4, 2.5 cm margins, Times New Roman 12 pt, 1.5 line spacing,
+continuous line numbers for reviewers, Word's own Title, Heading, Caption and
+List styles, editable tables with the caption above, figures inline with the
+caption below, page numbers. No section breaks and no columns, so the layout
+holds in Word, Pages, LibreOffice and Google Docs alike.
 
 Figures: the charts come from make_figures.py as 300 dpi PNG; the two
 diagrams are rendered to PNG with Chrome from the inline SVG in the page.
@@ -40,7 +43,7 @@ OUTPUT = HERE / "SentryGate-journal.docx"
 
 FONT = "Times New Roman"
 PAGE_W, PAGE_H = Cm(21.0), Cm(29.7)
-MARGIN_LR, MARGIN_TB = Cm(1.55), Cm(1.7)
+MARGIN_LR, MARGIN_TB = Cm(2.5), Cm(2.5)
 TEXT_W = PAGE_W - 2 * MARGIN_LR
 GUTTER = Cm(0.7)
 COL_W = (TEXT_W - GUTTER) // 2
@@ -288,6 +291,39 @@ def svg_source(node: Node) -> str:
 
 # --- the converter ----------------------------------------------------------------
 
+BODY_PT, TABLE_PT, CAPTION_PT, REF_PT = 12, 10, 10, 11
+
+
+def plain_style(style, size: float, bold=False, italic=False, before=0, after=0, line=1.5) -> None:
+    """Times New Roman, black, no theme font or colour (the default template's headings are blue Calibri)."""
+    style.font.name, style.font.size = FONT, Pt(size)
+    style.font.bold, style.font.italic = bold, italic
+    style.font.color.rgb = RGBColor(0, 0, 0)
+    rpr = style.element.get_or_add_rPr()
+    fonts = rpr.find(qn("w:rFonts"))
+    if fonts is None:
+        fonts = OxmlElement("w:rFonts")
+        rpr.append(fonts)
+    for attr in ("w:asciiTheme", "w:hAnsiTheme", "w:eastAsiaTheme", "w:cstheme"):
+        if fonts.get(qn(attr)) is not None:
+            del fonts.attrib[qn(attr)]
+    for attr in ("w:ascii", "w:hAnsi", "w:eastAsia", "w:cs"):
+        fonts.set(qn(attr), FONT)
+    pf = style.paragraph_format
+    pf.space_before, pf.space_after, pf.line_spacing = Pt(before), Pt(after), line
+
+
+def line_numbers(section) -> None:
+    """Continuous line numbers in the margin, for reviewers. Must sit after pgMar in sectPr."""
+    ln = OxmlElement("w:lnNumType")
+    ln.set(qn("w:countBy"), "1")
+    ln.set(qn("w:restart"), "continuous")
+    ln.set(qn("w:distance"), "283")
+    sect = section._sectPr
+    anchor = sect.find(qn("w:pgMar"))
+    anchor.addnext(ln)
+
+
 class Converter:
     def __init__(self, raw_html: str):
         tree = Tree()
@@ -296,32 +332,35 @@ class Converter:
         self.svgs = re.findall(r"<svg\b.*?</svg>", raw_html, re.S)
         self.svg_i = 0
         self.doc = Document()
-        self.cols = 1
 
+    # --- page and styles ---
     def setup(self) -> None:
         doc = self.doc
-        st = doc.styles["Normal"]
-        st.font.name, st.font.size = FONT, Pt(10)
-        st.element.rPr.rFonts.set(qn("w:eastAsia"), FONT)
+        st = doc.styles
+        plain_style(st["Normal"], BODY_PT)
+        plain_style(st["Title"], 16, bold=True, after=12, line=1.15)
+        plain_style(st["Heading 1"], BODY_PT, bold=True, before=18, after=6)
+        plain_style(st["Heading 2"], BODY_PT, bold=True, italic=True, before=12, after=4)
+        plain_style(st["Caption"], CAPTION_PT, before=6, after=6, line=1.15)
+        plain_style(st["List Bullet"], BODY_PT)
+        for name in ("Title", "Heading 1", "Heading 2"):
+            st[name].paragraph_format.keep_with_next = True
+        # The Title style has a bottom border in the default template; journals do not.
+        tp = st["Title"].element.find(qn("w:pPr"))
+        if tp is not None and tp.find(qn("w:pBdr")) is not None:
+            tp.remove(tp.find(qn("w:pBdr")))
         sec = doc.sections[0]
         sec.page_width, sec.page_height = PAGE_W, PAGE_H
         sec.left_margin = sec.right_margin = MARGIN_LR
         sec.top_margin = sec.bottom_margin = MARGIN_TB
-        sec.header_distance = sec.footer_distance = Cm(0.9)
-        title = re.sub(r"\s+", " ", find(self.root, lambda n: n.tag == "title")[0].text()).strip()
-        short = re.search(r'content: "([^"]+)"', open(PAGE).read())
-        running = html.unescape(short.group(1)).replace("\\2013", "–").replace("  ", " ") if short else title
-        hp = sec.header.paragraphs[0]
-        hp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        r = hp.add_run(running)
-        r.italic, r.font.size, r.font.name = True, Pt(8.5), FONT
+        line_numbers(sec)
         fp = sec.footer.paragraphs[0]
         fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
         self._page_field(fp)
 
     def _page_field(self, p) -> None:
         r = p.add_run()
-        r.font.size, r.font.name = Pt(9), FONT
+        r.font.size, r.font.name = Pt(10), FONT
         for kind, text in (("begin", None), (None, " PAGE "), ("end", None)):
             if kind:
                 el = OxmlElement("w:fldChar")
@@ -332,164 +371,133 @@ class Converter:
                 el.text = text
             r._r.append(el)
 
-    def ensure_cols(self, n: int) -> None:
-        if self.cols != n:
-            new_section(self.doc, n)
-            self.cols = n
+    def para(self, style: str | None = None, align=WD_ALIGN_PARAGRAPH.JUSTIFY, indent=True):
+        p = self.doc.add_paragraph(style=style) if style else self.doc.add_paragraph()
+        p.paragraph_format.alignment = align
+        p.paragraph_format.first_line_indent = Cm(0.75) if indent else None
+        return p
 
-    # --- front matter ---
+    # --- title page ---
     def front(self) -> None:
-        doc = self.doc
         h1 = find(self.root, lambda n: n.tag == "h1")[0]
-        p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, after=8, line=1.05)
-        add_runs(p, h1, 17, bold=True)
+        p = self.para("Title", WD_ALIGN_PARAGRAPH.CENTER, indent=False)
+        add_runs(p, h1, 16, bold=True)
         strip_edges(p)
         for div in find(self.root, lambda n: n.tag == "div" and n.cls() & {"authors", "affil"}):
-            size = 11 if "authors" in div.cls() else 9
-            p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, after=2)
-            add_runs(p, div, size, italic="affil" in div.cls())
+            p = self.para(None, WD_ALIGN_PARAGRAPH.CENTER, indent=False)
+            add_runs(p, div, BODY_PT, italic="affil" in div.cls())
             strip_edges(p)
-        rule = fmt(doc.add_paragraph(), indent=False, before=6, after=8)
-        para_border(rule, "bottom", 12)
-
-        info = find(self.root, lambda n: "info" in n.cls())[0]
         abstract = find(self.root, lambda n: "abstract" in n.cls())[0]
-        t = doc.add_table(rows=1, cols=2)
-        table_no_borders(t)
-        t.alignment = WD_TABLE_ALIGNMENT.CENTER
-        widths = (int(TEXT_W * 0.27), TEXT_W - int(TEXT_W * 0.27))
-        for i, w in enumerate(widths):
-            t.columns[i].width = w
-            t.rows[0].cells[i].width = w
-        left, right = t.rows[0].cells
-        cell_borders(right, left=4)
-        self._spaced_heading(left.paragraphs[0], "ARTICLE INFO")
-        for pnode in find(info, lambda n: n.tag == "p"):
-            text = pnode.text().strip()
-            q = left.add_paragraph()
-            fmt(q, size=8.6, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False)
-            if text:
-                add_runs(q, pnode, 8.6)
-                strip_edges(q)
-        self._spaced_heading(right.paragraphs[0], "ABSTRACT", pad=True)
-        q = right.add_paragraph()
-        fmt(q, size=8.9, indent=False, line=1.1)
-        q.paragraph_format.left_indent = Cm(0.35)
+        h = self.para("Heading 1", WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+        h.add_run("Abstract")
+        p = self.para(indent=False)
         body = Node("x", {}, None)
         body.children = [c for c in abstract.children if not (isinstance(c, Node) and c.tag == "h4")]
-        add_runs(q, body, 8.9)
-        strip_edges(q)
-        rule = fmt(doc.add_paragraph(), indent=False, before=8, after=10)
-        para_border(rule, "bottom", 6)
-
-    def _spaced_heading(self, p, text: str, pad=False) -> None:
-        fmt(p, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, after=5)
-        if pad:
-            p.paragraph_format.left_indent = Cm(0.35)
-        r = p.add_run(" ".join(text))
-        r.bold, r.font.size, r.font.name = True, Pt(8.6), FONT
-        para_border(p, "bottom", 4)
+        add_runs(p, body, BODY_PT)
+        strip_edges(p)
+        info = find(self.root, lambda n: "info" in n.cls())[0]
+        words = [pn.text().strip() for pn in find(info, lambda n: n.tag == "p")]
+        words = [w for w in words if w and not w.lower().startswith("keywords")]
+        p = self.para(None, WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+        p.paragraph_format.space_before = Pt(12)
+        r = p.add_run("Keywords: ")
+        r.bold = True
+        p.add_run("; ".join(words))
 
     # --- body ---
     def body(self) -> None:
         cols = find(self.root, lambda n: n.tag == "div" and "cols" in n.cls())[0]
-        self.ensure_cols(2)
         self.walk(cols)
 
     def walk(self, node: Node) -> None:
         for c in node.children:
-            if isinstance(c, str):
-                if c.strip():
-                    p = fmt(self.doc.add_paragraph())
-                    add_runs(p, c, 10)
-                continue
-            self.block(c)
+            if isinstance(c, Node):
+                self.block(c)
 
     def block(self, n: Node) -> None:
-        doc, cls = self.doc, n.cls()
+        cls = n.cls()
         if n.tag == "h2":
-            self.ensure_cols(2)
-            p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, before=10, after=5)
-            add_runs(p, n, 11, bold=True)
+            p = self.para("Heading 1", WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+            add_runs(p, n, BODY_PT, bold=True)
             strip_edges(p)
-            for r in p.runs:
-                r.text = r.text.upper()
-            keep_with_next(p)
         elif n.tag == "h3":
-            self.ensure_cols(2)
-            p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, before=7, after=3)
-            add_runs(p, n, 10, bold=True, italic=True)
+            p = self.para("Heading 2", WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+            add_runs(p, n, BODY_PT, bold=True, italic=True)
             strip_edges(p)
-            keep_with_next(p)
         elif n.tag == "p":
-            self.ensure_cols(2)
-            first = "nofirst" in cls or (n.attrs.get("style") or "").find("text-indent:0") >= 0
-            p = fmt(doc.add_paragraph(), indent=not first)
-            add_runs(p, n, 10)
+            first = "nofirst" in cls or "text-indent:0" in (n.attrs.get("style") or "")
+            prev = n.parent.children[:n.parent.children.index(n)]
+            prev_tags = [x.tag for x in prev if isinstance(x, Node)]
+            after_heading = bool(prev_tags) and prev_tags[-1] in ("h2", "h3")
+            p = self.para(indent=not (first or after_heading))
+            add_runs(p, n, BODY_PT)
             strip_edges(p)
         elif n.tag in ("ul", "ol"):
-            self.ensure_cols(2)
             for li in find(n, lambda x: x.tag == "li"):
-                p = fmt(doc.add_paragraph(style="List Bullet"), indent=False)
-                p.paragraph_format.left_indent = Cm(0.55)
-                p.paragraph_format.first_line_indent = Cm(-0.35)
-                p.paragraph_format.space_after = Pt(1.5)
-                add_runs(p, li, 10)
+                p = self.para("List Bullet", indent=False)
+                add_runs(p, li, BODY_PT)
                 strip_edges(p)
         elif n.tag == "div" and "eq" in cls:
-            p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, before=4, after=4)
+            p = self.para(None, WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+            p.paragraph_format.space_before = p.paragraph_format.space_after = Pt(6)
             ts = p.paragraph_format.tab_stops
-            ts.add_tab_stop(COL_W // 2, WD_TAB_ALIGNMENT.CENTER)
-            ts.add_tab_stop(COL_W, WD_TAB_ALIGNMENT.RIGHT)
+            ts.add_tab_stop(TEXT_W // 2, WD_TAB_ALIGNMENT.CENTER)
+            ts.add_tab_stop(TEXT_W, WD_TAB_ALIGNMENT.RIGHT)
             num = find(n, lambda x: "n" in x.cls())
             eq = Node("x", {}, None)
             eq.children = [c for c in n.children if not (isinstance(c, Node) and "n" in c.cls())]
             p.add_run("\t")
-            add_runs(p, eq, 10, italic=True)
+            add_runs(p, eq, BODY_PT, italic=True)
             p.add_run("\t" + (num[0].text() if num else ""))
         elif n.tag == "div" and "tbl" in cls:
-            self.table(n, wide="span" in cls)
+            self.table(n)
         elif n.tag == "figure":
             self.figure(n, wide="span" in cls)
         elif n.tag == "div" and "refs" in cls:
-            self.ensure_cols(2)
             for pr in find(n, lambda x: x.tag == "p"):
-                p = fmt(doc.add_paragraph(), size=8.6, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, after=3, line=1.05)
-                p.paragraph_format.left_indent = Cm(0.55)
-                p.paragraph_format.first_line_indent = Cm(-0.55)
-                add_runs(p, pr, 8.6)
+                p = self.para(None, WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+                pf = p.paragraph_format
+                pf.left_indent, pf.first_line_indent = Cm(1.0), Cm(-1.0)
+                pf.space_after, pf.line_spacing = Pt(6), 1.15
+                add_runs(p, pr, REF_PT)
                 strip_edges(p)
         elif n.tag in ("div", "span", "section"):
             self.walk(n)
 
-    # --- tables ---
-    def table(self, n: Node, wide: bool) -> None:
-        doc = self.doc
-        self.ensure_cols(1 if wide else 2)
-        width = TEXT_W if wide else COL_W
-        cap = find(n, lambda x: "cap" in x.cls())[0]
-        p = fmt(doc.add_paragraph(), size=8.8, align=WD_ALIGN_PARAGRAPH.LEFT, indent=False, before=6, after=3)
-        add_runs(p, cap, 8.8)
+    def caption(self, node: Node):
+        """'Table 1.' or 'Fig. 1.' in bold, then the caption text in roman."""
+        p = self.para("Caption", WD_ALIGN_PARAGRAPH.LEFT, indent=False)
+        add_runs(p, node, CAPTION_PT)
         strip_edges(p)
-        keep_with_next(p)
+        for r in p.runs:
+            r.italic = None
+        if p.runs and not p.runs[0].text.rstrip().endswith("."):
+            p.runs[0].text = p.runs[0].text.rstrip() + "."
+            if len(p.runs) > 1 and not p.runs[1].text.startswith(" "):
+                p.runs[1].text = " " + p.runs[1].text
+        return p
+
+    # --- tables ---
+    def table(self, n: Node) -> None:
+        doc = self.doc
+        width = TEXT_W
+        cap = self.caption(find(n, lambda x: "cap" in x.cls())[0])
+        cap.paragraph_format.keep_with_next = True
         tnode = find(n, lambda x: x.tag == "table")[0]
         rows = find(tnode, lambda x: x.tag == "tr")
         cells = [[c for c in r.children if isinstance(c, Node) and c.tag in ("th", "td")] for r in rows]
         ncol = max(len(r) for r in cells)
-        # Column widths from the longest text in each column, within limits.
+
         def natural(i: int) -> tuple[int, int]:
-            """(full length, shortest it may get) of column i, in characters."""
             texts = [r[i].text().strip() for r in cells if i < len(r)]
-            # A cell with no letters (a sum, a range) is one unbreakable piece.
             floor = max((len(t) if not any(ch.isalpha() for ch in t) else len(w)
                          for t in texts for w in (t.split() or [""])), default=1)
             return max(len(t) for t in texts) + 2, floor + 2
 
         sizes = [natural(i) for i in range(ncol)]
         weights = [full for full, _ in sizes]
-        fits = int(width / 360000 * 7.2)   # characters that fit at 8.4 pt, roughly 7.2 per cm
+        fits = int(width / 360000 * 6.2)   # characters per cm at 10 pt
         while sum(weights) > fits:
-            # Shrink whichever column has the most room to give.
             slack = [w - low for w, (_, low) in zip(weights, sizes)]
             k = max(range(ncol), key=lambda j: slack[j])
             if slack[k] <= 0:
@@ -498,11 +506,12 @@ class Converter:
         total = sum(weights)
         widths = [int(width * w / total) for w in weights]
         widths[-1] = width - sum(widths[:-1])
+
         t = doc.add_table(rows=len(cells), cols=ncol)
         t.alignment = WD_TABLE_ALIGNMENT.CENTER
         t.autofit = False
         table_no_borders(t)
-        cell_margins(t)
+        cell_margins(t, top=30, bottom=30, left=80, right=80)
         for i, w in enumerate(widths):
             t.columns[i].width = w
         for ri, (row_node, row) in enumerate(zip(rows, cells)):
@@ -511,11 +520,14 @@ class Converter:
                 cell = t.rows[ri].cells[ci]
                 cell.width = widths[ci]
                 q = cell.paragraphs[0]
-                left = "l" in cnode.cls()
-                fmt(q, size=8.4, align=WD_ALIGN_PARAGRAPH.LEFT if left else WD_ALIGN_PARAGRAPH.CENTER,
-                    indent=False, line=1.0)
-                add_runs(q, cnode, 8.4, bold="best" in row_cls)
+                q.paragraph_format.alignment = (WD_ALIGN_PARAGRAPH.LEFT if "l" in cnode.cls()
+                                                else WD_ALIGN_PARAGRAPH.CENTER)
+                q.paragraph_format.first_line_indent = None
+                q.paragraph_format.line_spacing = 1.0
+                add_runs(q, cnode, TABLE_PT, bold="best" in row_cls)
                 strip_edges(q)
+                # Word keeps a table on one page when every row but the last keeps with the next.
+                q.paragraph_format.keep_with_next = ri < len(cells) - 1
                 sides = {}
                 if ri == 0:
                     sides.update(top=10, bottom=5)
@@ -525,51 +537,42 @@ class Converter:
                     sides["top"] = 5
                 if sides:
                     cell_borders(cell, **sides)
-            # Keep a row on one page.
             trpr = t.rows[ri]._tr.get_or_add_trPr()
-            cant = OxmlElement("w:cantSplit")
-            trpr.append(cant)
-        sp = fmt(doc.add_paragraph(), indent=False, after=4)
-        sp.paragraph_format.line_spacing = 0.6
+            trpr.append(OxmlElement("w:cantSplit"))
+            if ri == 0:
+                trpr.append(OxmlElement("w:tblHeader"))   # repeat the header on a new page
+        spacer = self.para(indent=False)
+        spacer.paragraph_format.space_after = Pt(6)
 
     # --- figures ---
     def figure(self, n: Node, wide: bool) -> None:
-        doc = self.doc
-        self.ensure_cols(1 if wide else 2)
-        width = TEXT_W if wide else COL_W
-        style = n.attrs.get("style") or ""
-        m = re.search(r"padding:\s*0\s+(\d+)%", style)
-        if m:
-            width = int(width * (1 - 2 * int(m.group(1)) / 100))
+        width = TEXT_W if wide else int(TEXT_W * 0.62)
         img = find(n, lambda x: x.tag == "img")
         if img:
-            src = img[0].attrs["src"].replace("../figures/", "").replace("figures/", "")
+            src = img[0].attrs["src"].split("/")[-1]
             path = HERE / "figures" / src.replace(".svg", ".png")
-            im_style = img[0].attrs.get("style") or ""
-            mw = re.search(r"width:\s*(\d+)%", im_style)
-            if mw:
-                width = int(width * int(mw.group(1)) / 100)
         else:
             svg = self.svgs[self.svg_i]
             self.svg_i += 1
             path = render_svg(svg, f"diagram-{self.svg_i}")
-        p = fmt(doc.add_paragraph(), align=WD_ALIGN_PARAGRAPH.CENTER, indent=False, before=6, after=2)
+        p = self.para(None, WD_ALIGN_PARAGRAPH.CENTER, indent=False)
+        p.paragraph_format.space_before = Pt(6)
+        p.paragraph_format.line_spacing = 1.0
+        p.paragraph_format.keep_with_next = True
         p.add_run().add_picture(str(path), width=Emu(width))
-        keep_with_next(p)
-        cap = find(n, lambda x: x.tag == "figcaption")[0]
-        q = fmt(doc.add_paragraph(), size=8.8, align=WD_ALIGN_PARAGRAPH.CENTER, indent=False, after=8)
-        add_runs(q, cap, 8.8)
-        strip_edges(q)
+        cap = self.caption(find(n, lambda x: x.tag == "figcaption")[0])
+        cap.paragraph_format.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        cap.paragraph_format.space_after = Pt(12)
 
     def build(self) -> None:
         self.setup()
         self.front()
         self.body()
-        self.doc.core_properties.title = re.sub(r"\s+", " ", find(self.root, lambda n: n.tag == "title")[0].text())
+        title = re.sub(r"\s+", " ", find(self.root, lambda n: n.tag == "title")[0].text()).strip()
+        self.doc.core_properties.title = title
         self.doc.core_properties.author = "Divyansh Sharma, Sarvagya Dabas, Yashvit Gauri, Sandeep Singh"
         schema_order(self.doc.element.body)
         for sec in self.doc.sections:
-            schema_order(sec.header._element)
             schema_order(sec.footer._element)
         fix_settings(self.doc)
         self.doc.save(OUTPUT)
@@ -579,8 +582,7 @@ class Converter:
 def main() -> int:
     if not PAGE.exists():
         raise SystemExit("Build the paper first: python3 paper/journal/build.py")
-    raw = PAGE.read_text()
-    Converter(raw).build()
+    Converter(PAGE.read_text()).build()
     return 0
 
 
