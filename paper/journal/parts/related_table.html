@@ -1,19 +1,19 @@
 <div class="tbl span brk">
-<div class="cap"><b>Table 1</b> <i>Chronological summary of the prior work discussed in Section 2.</i></div>
+<div class="cap"><b>Table 1</b> <i>Prior work on caching and prompt injection.</i></div>
 <table>
 <tr><th class="l">Study</th><th class="l">Setting</th><th class="l">What it shows</th><th class="l">Countermeasure</th></tr>
 <tr><td class="l">Kettle (2018)</td><td class="l">Web caches</td><td class="l">Unkeyed request inputs let one request poison the response served to everyone</td><td class="l">Key on every input that changes the response</td></tr>
-<tr><td class="l">Nguyen et al. (2019)</td><td class="l">Web caches and CDNs</td><td class="l">Malformed requests make caches store and serve error pages (CPDoS)</td><td class="l">Do not cache error responses</td></tr>
+<tr><td class="l">Nguyen et al. (2019)</td><td class="l">Web caches and content delivery networks</td><td class="l">Malformed requests make caches store and serve error pages</td><td class="l">Do not cache error responses</td></tr>
 <tr><td class="l">Mirheidari et al. (2020)</td><td class="l">340 high-profile sites</td><td class="l">Web cache deception leaks private pages in the wild</td><td class="l">Consistent path handling</td></tr>
 <tr><td class="l">Perez &amp; Ribeiro (2022)</td><td class="l">GPT-3</td><td class="l">Handwritten prompts hijack goals and leak prompts</td><td class="l">None proposed</td></tr>
 <tr><td class="l">Bang (2023)</td><td class="l">GPTCache</td><td class="l">Embedding-similarity cache in front of LLM APIs</td><td class="l">(Performance, not security)</td></tr>
 <tr><td class="l">Greshake et al. (2023)</td><td class="l">LLM-integrated apps</td><td class="l">Indirect prompt injection compromises deployed apps</td><td class="l">Discussed, not evaluated</td></tr>
 <tr><td class="l">Liu et al. (2024)</td><td class="l">10 LLMs, 7 tasks</td><td class="l">Benchmark of 5 attacks and 10 defences; detectors are imperfect</td><td class="l">Benchmarked</td></tr>
 <tr><td class="l">Gu et al. (2025)</td><td class="l">7 commercial APIs</td><td class="l">Timing audits reveal prompt caches shared across users</td><td class="l">Disclosure, per-user caches</td></tr>
-<tr><td class="l">Song et al. (2025)</td><td class="l">LLM serving systems</td><td class="l">KV and semantic-cache timing leaks prompts</td><td class="l">Mitigations discussed</td></tr>
+<tr><td class="l">Song et al. (2025)</td><td class="l">LLM serving systems</td><td class="l">Key-value and semantic-cache timing leaks prompts</td><td class="l">Mitigations discussed</td></tr>
 <tr><td class="l">Hackett et al. (2025)</td><td class="l">6 guardrail detectors</td><td class="l">Character-level and adversarial evasion of injection detectors</td><td class="l">None</td></tr>
 <tr><td class="l">Schroeder et al. (2026)</td><td class="l">Semantic prompt caches</td><td class="l">One global threshold cannot bound wrong hits</td><td class="l">Per-entry learned thresholds</td></tr>
-<tr><td class="l">Wu, Wang, et al. (2026)</td><td class="l">Azure, AWS, Alibaba caches</td><td class="l">Semantic caches can be poisoned for other users; injection classifiers miss benign-looking poison</td><td class="l">Check the answer fits the query</td></tr>
+<tr><td class="l">Wu, Wang, et al. (2026)</td><td class="l">Azure, Amazon Web Services and Alibaba caches</td><td class="l">Semantic caches can be poisoned for other users; injection classifiers miss benign-looking poison</td><td class="l">Check the answer fits the query</td></tr>
 <tr><td class="l">Wu, Ying, et al. (2026)</td><td class="l">vLLM, SGLang, GPTCache</td><td class="l">Six cache attacks; a hash collision lets content inherit a benign moderation result</td><td class="l">Salted keys, verification</td></tr>
 <tr><td class="l">Zhang, Liu, et al. (2026)</td><td class="l">GPTCache, cloud caches</td><td class="l">Black-box key collisions hijack responses (about 86% hit rate)</td><td class="l">Salting, isolation, perplexity</td></tr>
 <tr><td class="l">Zhang, Yao, et al. (2026)</td><td class="l">GPTCache</td><td class="l">Similarity is not validity</td><td class="l">Re-check every hit for answer validity</td></tr>

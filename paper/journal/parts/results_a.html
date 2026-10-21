@@ -1,12 +1,12 @@
 <h2>6. Results</h2>
 
 <h3>6.1 The bypass on a running gateway (E1)</h3>
-<p>Table 4 and Fig. 3 report the bypass rate, the share of attack rewordings answered with the poison while the gateway's log records that the filter did not run, across seven cache thresholds. At &tau; = 0.85, a common default, {{w4_lazy_85}}% of lazy edits (95% CI {{w4_lazy_85_ci}}) and {{w4_all_85}}% of all rewordings were served the poison unscreened. Even at the strictest setting a product would plausibly use, 0.95, {{w4_lazy_95}}% of lazy edits still got through. Full paraphrases behave very differently: they match rarely at strict thresholds ({{w4_rewrite_95}}% at 0.95) and only become dangerous as the threshold loosens ({{w4_rewrite_65}}% at 0.65), because a genuine paraphrase moves the embedding much further than a changed capital letter does.</p>
+<p>Table 4 and Fig. 3 report the bypass rate, the share of attack rewordings answered with the poison while the gateway's log records that the filter did not run, across seven cache thresholds; each threshold uses all {{n_variants}} rewordings, and the shaded bands in Fig. 3 are 95% seed-bootstrap CIs. At &tau; = 0.85, a common default, {{w4_lazy_85}}% of lazy edits (95% CI {{w4_lazy_85_ci}}) and {{w4_all_85}}% of all rewordings were served the poison unscreened. Even at the strictest setting a product would plausibly use, 0.95, {{w4_lazy_95}}% of lazy edits still got through. Full paraphrases behave very differently: they match rarely at strict thresholds ({{w4_rewrite_95}}% at 0.95) and only become dangerous as the threshold loosens ({{w4_rewrite_65}}% at 0.65), because a genuine paraphrase moves the embedding much further than a changed capital letter does.</p>
 
 <p>The practical reading is that the attacker needs no skill. The cheapest rewordings are the most effective, and no threshold value is both safe and useful: tightening &tau; from 0.85 to 0.95 lowers the lazy-edit bypass rate by only {{w4_lazy_drop}} points, while a stricter threshold necessarily matches fewer of the honest rephrasings that make a semantic cache worth having.</p>
 
 <div class="tbl">
-<div class="cap"><b>Table 4</b> <i>Bypass rate (%) by cache threshold, with 95% seed-bootstrap intervals; {{n_variants}} rewordings per threshold.</i></div>
+<div class="cap"><b>Table 4</b> <i>Bypass rate (%) by cache threshold, with 95% CIs.</i></div>
 <table>
 <tr><th>&tau;</th><th>Lazy edits</th><th>Full paraphrases</th><th>All</th></tr>
 <tr><td>0.95</td><td>{{w4_lazy_95}} ({{w4_lazy_95_ci}})</td><td>{{w4_rewrite_95}} ({{w4_rewrite_95_ci}})</td><td>{{w4_all_95}} ({{w4_all_95_ci}})</td></tr>
@@ -21,7 +21,7 @@
 
 <figure>
 <img src="figures/fig_bypass_threshold.svg" alt="">
-<figcaption><b>Fig. 3.</b> <i>Bypass rate against the cache threshold, with 95% seed-bootstrap bands. Lazy edits get through at every setting; full paraphrases only once the cache is loose.</i></figcaption>
+<figcaption><b>Fig. 3.</b> <i>Bypass rate against cache threshold.</i></figcaption>
 </figure>
 
 <p>Four checks support the measurement. The exact seed text, which must always hit, was served the poison in {{w4_exact}} cases. Every one of the {{w4_confirmed}} confirmed bypasses across the sweep has a log line recording that screening did not run, so the claim is read from the system under test. No honest control was served the poison ({{w4_controls}} control requests). Finally, the similarity score the gateway logged agreed with its hit-or-miss decision for every request ({{w4_mismatch}} disagreements).</p>
@@ -30,12 +30,12 @@
 <p>Running the same build with the filter moved in front of the cache, and nothing else changed, gives a bypass rate of zero, which establishes that the ordering causes the bypass. That zero holds by construction, however, since in the filter-first order the filter always runs. The poison is still served for {{e2_served_pct}}% of rewordings in this order, because the filter itself lets those texts through: asked directly, it blocks {{e2_blocked_pct}}% of the rewordings, {{e2_blocked_jayavibhav}}% of those derived from jayavibhav seeds but only {{e2_blocked_deepset}}% of those from deepset, whose attacks are more conversational. This is the filter's own limit, not the cache's, and it is the reason every later result separates cache-caused leaks from filter misses.</p>
 
 <h3>6.3 Verdict-tagged caching (E3)</h3>
-<p>Table 5 and Fig. 4 report the five defence settings, each with the poison saved as an attack (the easy case) and as clean (the realistic case), at &tau; = 0.85. Four findings stand out.</p>
+<p>Table 5 and Fig. 4 report the five defence settings, each with the poison saved as an attack (the easy case) and as clean (the realistic case), at &tau; = 0.85. Table 5 gives the cache-caused leak rate with 95% CIs, the share of honest rewordings still answered from the cache, and the median latency of honest hits and misses; because the model reply is mocked, a miss excludes model time. In Fig. 4 the coloured part of each bar is cache-caused and the grey part is what the filter misses even when asked. Four findings stand out.</p>
 
 <div class="tbl span">
-<div class="cap"><b>Table 5</b> <i>Defence settings (E3). Cache-caused leak rate (%) with 95% seed-bootstrap intervals, the share of honest rewordings still answered from the cache, and median latency of honest hits and misses (model reply mocked, so a miss excludes model time).</i></div>
+<div class="cap"><b>Table 5</b> <i>Defence settings at &tau; = 0.85 (E3).</i></div>
 <table>
-<tr><th class="l">Setting</th><th>Cache-caused, saved as clean</th><th>Cache-caused, saved as attack</th><th>Honest hits kept</th><th>Honest hit p50</th><th>Miss p50</th></tr>
+<tr><th class="l">Setting</th><th>Cache-caused, saved as clean</th><th>Cache-caused, saved as attack</th><th>Honest hits kept</th><th>Median honest hit</th><th>Median miss</th></tr>
 <tr><td class="l">No defence</td><td>{{p3_base_clean}} ({{p3_base_clean_ci}})</td><td>{{p3_base_attack}} ({{p3_base_attack_ci}})</td><td>{{p3_base_hits}}%</td><td>{{p3_base_hit_ms}} ms</td><td>{{p3_base_miss_ms}} ms</td></tr>
 <tr><td class="l">Label match only</td><td>{{p3_filter_clean}} ({{p3_filter_clean_ci}})</td><td>{{p3_filter_attack}} ({{p3_filter_attack_ci}})</td><td>{{p3_filter_hits}}%</td><td>{{p3_filter_hit_ms}} ms</td><td>{{p3_filter_miss_ms}} ms</td></tr>
 <tr><td class="l">Re-check risky hits only</td><td>{{p3_recheck_clean}} ({{p3_recheck_clean_ci}})</td><td>{{p3_recheck_attack}} ({{p3_recheck_attack_ci}})</td><td>{{p3_recheck_hits}}%</td><td>{{p3_recheck_hit_ms}} ms</td><td>{{p3_recheck_miss_ms}} ms</td></tr>
@@ -46,7 +46,7 @@
 
 <figure class="span">
 <img src="figures/fig_defence_settings.svg" alt="" style="width:88%">
-<figcaption><b>Fig. 4.</b> <i>Rewordings served the poison under each defence setting. Coloured: cache-caused (the filter would have blocked the text if asked), with 95% intervals. Grey: texts the filter misses even when asked, which no cache defence can stop.</i></figcaption>
+<figcaption><b>Fig. 4.</b> <i>Poison served under each defence setting.</i></figcaption>
 </figure>
 
 <p><i>Label matching stops the easy case.</i> When the poison was saved with an attack label, refusing entries whose stored verdict is "attack" cuts cache-caused leaks from {{p3_base_attack}}% to {{p3_filter_attack}}%. The residue comes from seeds the filter itself labelled clean when the poison was stored, whose rewordings it would have caught.</p>

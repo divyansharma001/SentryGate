@@ -42,7 +42,7 @@
 
   <!-- miss -->
   <rect class="dg-box" x="476" y="262" width="110" height="48"/>
-  <text class="dg-t" x="531" y="284">Injection filter</text><text class="dg-s" x="531" y="300">+ PII scan</text>
+  <text class="dg-t" x="531" y="284">Injection filter</text><text class="dg-s" x="531" y="300">+ personal-data scan</text>
 
   <rect class="dg-box" x="600" y="262" width="96" height="48"/>
   <text class="dg-t" x="648" y="284">Model picker</text><text class="dg-s" x="648" y="300">cheap / strong</text>

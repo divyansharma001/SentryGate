@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<title>The Filter That Was Never Asked</title>
+<title>Measuring and Closing a Semantic-Cache Bypass of Prompt-Injection Filters in Large Language Model Gateways</title>
 <!--
   Source of the journal-style paper. Do not edit the PDF; edit this file.
   Every double-brace token is a number filled in by build.py from the committed
@@ -13,7 +13,7 @@
 @page {
   size: A4;
   margin: 17mm 15.5mm 17mm 15.5mm;
-  @top-center { content: "Sharma et al.  \2013  The Filter That Was Never Asked"; font: italic 8.5pt "Times New Roman", Times, serif; color: #333; }
+  @top-center { content: "Sharma et al.  \2013  Semantic-Cache Bypass of Prompt-Injection Filters"; font: italic 8.5pt "Times New Roman", Times, serif; color: #333; }
   @bottom-center { content: counter(page); font: 9pt "Times New Roman", Times, serif; color: #333; }
 }
 * { box-sizing: border-box; }
@@ -23,7 +23,7 @@ body {
   font: 10pt/1.36 "Times New Roman", Times, "STIX Two Text", serif;
   hyphens: auto; -webkit-hyphens: auto;
 }
-h1.title { font-size: 17.5pt; line-height: 1.2; font-weight: bold; margin: 0 0 9pt; }
+h1.title { font-size: 17.5pt; line-height: 1.2; font-weight: bold; margin: 0 0 9pt; hyphens: none; -webkit-hyphens: none; }
 .authors { font-size: 11pt; margin: 0 0 3pt; }
 .authors sup, .affil sup { font-size: 7pt; }
 .affil { font-size: 9pt; font-style: italic; margin: 0 0 2pt; }
@@ -76,7 +76,7 @@ sub, sup { line-height: 0; }
 </head>
 <body>
 
-<h1 class="title">The Filter That Was Never Asked: Measuring and Closing a Semantic-Cache Bypass of Prompt-Injection Filters in LLM Gateways</h1>
+<h1 class="title">Measuring and Closing a Semantic-Cache Bypass of <span class="nh">Prompt-Injection</span> Filters in Large Language Model Gateways</h1>
 <div class="authors">Divyansh Sharma<sup>a</sup>, Sarvagya Dabas<sup>a</sup>, Yashvit Gauri<sup>a</sup>, Sandeep Singh<sup>a</sup></div>
 <div class="affil"><sup>a</sup> Department of Information Technology, Maharaja Surajmal Institute of Technology, New Delhi, India</div>
 
@@ -108,7 +108,7 @@ sub, sup { line-height: 0; }
 
 <h2>1. Introduction</h2>
 
-<p>Large language models are rarely called directly by the applications that use them. A gateway, sometimes called an AI proxy or LLM router, sits between the application and the model provider and takes on the work that every application would otherwise repeat: authentication, spending limits, logging, routing to a cheaper model when a request is simple, and, increasingly, safety screening. Two of these jobs matter most here. A <i>semantic cache</i> turns each prompt into an embedding vector and, when a new prompt lies close enough to a stored one, returns the stored answer instead of paying for a new model call (Bang, 2023; Regmi &amp; Pun, 2024). A <i>safety filter</i>, typically a small classifier, scores each prompt for prompt injection, the class of attack in which input text tries to override the model's instructions (Perez &amp; Ribeiro, 2022; Greshake et al., 2023), and blocks it above a threshold. Prompt injection is ranked first in the OWASP Top 10 for LLM applications (OWASP Foundation, 2024).</p>
+<p>Large language models (LLMs) are rarely called directly by the applications that use them. A gateway, sometimes called an artificial intelligence (AI) proxy or LLM router, sits between the application and the model provider and takes on the work that every application would otherwise repeat: authentication, spending limits, logging, routing to a cheaper model when a request is simple, and, increasingly, safety screening. Two of these jobs matter most here. A <i>semantic cache</i> turns each prompt into an embedding vector and, when a new prompt lies close enough to a stored one, returns the stored answer instead of paying for a new model call (Bang, 2023; Regmi &amp; Pun, 2024). A <i>safety filter</i>, typically a small classifier, scores each prompt for prompt injection, the class of attack in which input text tries to override the model's instructions (Perez &amp; Ribeiro, 2022; Greshake et al., 2023), and blocks it above a threshold. Prompt injection is ranked first in the Open Worldwide Application Security Project (OWASP) Top 10 for LLM applications (OWASP Foundation, 2024).</p>
 
 <p>Each component is well studied on its own. Caching is evaluated for hit rate, cost and latency; filtering for detection and false-alarm rates. Recent work has shown that semantic caches can be poisoned so that other users receive attacker-chosen answers (Wu, Wang, et al., 2026; Zhang, Liu, et al., 2026). Less attention has gone to what happens when a cache and a separate safety filter share one request path, and the order between them is forced by economics. A cache lookup costs a few milliseconds, whereas a transformer-based filter costs tens to hundreds; if the filter ran first, every request would pay for it, including the repeated ones the cache was installed to make instant. Gateways therefore check the cache first. On a hit, the stored answer is returned and the filter is never consulted.</p>
 
@@ -121,7 +121,7 @@ sub, sup { line-height: 0; }
 <li><i>verdict-tagged caching</i>, a defence that makes the filter's stored verdict part of the cache's match condition and re-checks hits, implemented as one switch in the same code base as the vulnerable baseline;</li>
 <li>a decomposition of every leak into the part the cache causes and the part the filter would miss even when asked, which prevents a defence from being credited or blamed for the filter's own error;</li>
 <li>a study of the filter itself on texts it was not tuned on, which separates its false-alarm rate on ordinary text from its rate on adversarial look-alikes, together with live measurements of the output guard, rate limiter and model picker; and</li>
-<li>a fully reproducible artefact: every table and figure is regenerated from committed request logs, and recorded model replies make every run repeatable with no API key.</li>
+<li>a fully reproducible artefact: every table and figure is regenerated from committed request logs, and recorded model replies make every run repeatable with no application programming interface (API) key.</li>
 </ul>
 
 <p>Section 2 reviews related work. Section 3 states the threat model. Section 4 describes the gateway and the defence. Section 5 sets out the experimental method, Section 6 reports results, Section 7 discusses implications and threats to validity, and Section 8 concludes.</p>
@@ -147,7 +147,7 @@ sub, sup { line-height: 0; }
 <h2>3. Threat Model</h2>
 
 <h3>3.1 System model</h3>
-<p>We consider a gateway that receives chat-completion requests over an OpenAI-compatible HTTP API and, for each request, (i) looks the prompt up in a semantic cache, (ii) on a miss, screens the prompt with an injection classifier and blocks it if the score <i>s</i>(<i>p</i>) is at least a threshold &theta; = 0.5, and (iii) otherwise calls the model, returns the answer and stores the pair (<i>p</i>, <i>a</i>) in the cache. A stored entry is returned for a new prompt <i>q</i> whenever the cosine similarity of their embeddings, sim(<i>q</i>, <i>p</i>), is at least a cache threshold &tau;. This is the cache-first order used by real systems; Section 6.2 also evaluates the filter-first order as a reference.</p>
+<p>We consider a gateway that receives chat-completion requests over an OpenAI-compatible Hypertext Transfer Protocol (HTTP) API and, for each request, (i) looks the prompt up in a semantic cache, (ii) on a miss, screens the prompt with an injection classifier and blocks it if the score <i>s</i>(<i>p</i>) is at least a threshold &theta; = 0.5, and (iii) otherwise calls the model, returns the answer and stores the pair (<i>p</i>, <i>a</i>) in the cache. A stored entry is returned for a new prompt <i>q</i> whenever the cosine similarity of their embeddings, sim(<i>q</i>, <i>p</i>), is at least a cache threshold &tau;. This is the cache-first order used by real systems; Section 6.2 also evaluates the filter-first order as a reference.</p>
 
 <h3>3.2 Attacker</h3>
 <p>The attacker wants an answer the filter would refuse. They can send requests to the gateway like any user and reword their own prompts freely. They do not need access to the cache, the vector database, the model, other users' sessions or any special tooling; a text editor suffices.</p>
@@ -161,11 +161,11 @@ sub, sup { line-height: 0; }
 <h2>4. System Design</h2>
 
 <h3>4.1 Gateway architecture</h3>
-<p>SentryGate is an OpenAI-compatible gateway written in Python with FastAPI, deployed with Docker Compose behind an nginx reverse proxy (Fig. 1). The safety filter is ProtectAI's DeBERTa-v3 prompt-injection classifier (He et al., 2023; <span class="nh">ProtectAI.com</span>, 2024), and personal data is detected with Microsoft Presidio (Microsoft, n.d.); personal data is flagged in the verdict but not blocked. Prompts are embedded with all-MiniLM-L6-v2 (Reimers &amp; Gurevych, 2019; Wang et al., 2020). An exact-match layer in Redis sits in front of a similarity layer in Qdrant (Qdrant, n.d.), whose HNSW index (Malkov &amp; Yashunin, 2020) supports payload filters applied during the search itself. Model calls go to OpenRouter, recorded to disk so they replay for free. Every request writes one JSON line recording the outcome, the timing of each stage, the token cost, whether screening ran, and the full configuration and code version that produced it; the prompt itself is never logged, only its hash and length.</p>
+<p>SentryGate is an OpenAI-compatible gateway written in Python with FastAPI, deployed with Docker Compose behind an nginx reverse proxy (Fig. 1). The safety filter is ProtectAI's DeBERTa-v3 prompt-injection classifier (He et al., 2023; <span class="nh">ProtectAI.com</span>, 2024), and personal data is detected with Microsoft Presidio (Microsoft, n.d.); personal data is flagged in the verdict but not blocked. Prompts are embedded with all-MiniLM-L6-v2 (Reimers &amp; Gurevych, 2019; Wang et al., 2020). An exact-match layer in Redis sits in front of a similarity layer in Qdrant (Qdrant, n.d.), whose hierarchical navigable small world (HNSW) index (Malkov &amp; Yashunin, 2020) supports payload filters applied during the search itself. Model calls go to OpenRouter, recorded to disk so they replay for free. Every request writes one JavaScript Object Notation (JSON) line recording the outcome, the timing of each stage, the token cost, whether screening ran, and the full configuration and code version that produced it; the prompt itself is never logged, only its hash and length. Fig. 1 shows the request path. A hit is served only if its stored verdict and label fit the request and it passes the re-check and the output guard; a miss is screened, routed to a model, guarded, and stored with its verdict. The dashed line is the baseline path, on which a hit skips the filter.</p>
 
 <figure class="span" style="padding: 0 6%">
 {{svg_architecture}}
-<figcaption><b>Fig. 1.</b> <i>The gateway as deployed. A request passes nginx and the rate limiter, gets a cheap keyword label, and is looked up in the cache. A hit is served only if the stored verdict and label fit the request, is re-checked by the filter, and passes the output guard. A miss is screened, routed to a cheap or strong model, guarded, and stored together with its verdict. Dashed: the path the baseline takes on a hit, which skips the filter.</i></figcaption>
+<figcaption><b>Fig. 1.</b> <i>Request path through the gateway.</i></figcaption>
 </figure>
 
 <h3>4.2 Verdict-tagged caching</h3>
@@ -176,7 +176,7 @@ sub, sup { line-height: 0; }
 <p>The re-check R runs the full filter on <i>q</i> before a hit is served and blocks it if <i>s</i>(<i>q</i>) &ge; &theta;. It has two scopes. The <i>risky</i> scope re-checks a hit only if the request's cheap label is risky or the entry's stored injection score was at least 0.2, a close call when it was saved; it was our first design, intended to keep most hits at full speed. The <i>all</i> scope re-checks every hit. Section 6.3 shows why only the second closes the gap. Re-checking every hit may look as though it defeats the purpose of a cache, but it does not: what a cache saves is the model call, which costs seconds and money, not the filter, which costs tens of milliseconds and nothing.</p>
 
 <h3>4.3 Further mitigation layers</h3>
-<p>Three further layers complete the gateway. An <i>output guard</i> scans every answer, including one served from the cache, for four kinds of content an answer should almost never carry to an application that trusts it: browser script, destructive SQL, dangerous shell commands, and strings shaped like secret keys. It can be off, flag the answer in a response header, or block it; a blocked answer is never written to the cache. Because it inspects the answer rather than the question, it is a second line of defence behind the cache that does not depend on the input filter. A <i>rate limiter</i> enforces per-caller requests per minute (counting cache hits) and a daily model-token budget, with counters in Redis so that a restart does not reset them. A <i>model picker</i> scores each miss with plain rules (code, mathematics, reasoning words, length, multiple questions) and sends easy prompts to a cheap model and hard ones to a strong model, in the spirit of cost-aware routing (Chen, Zaharia, &amp; Zou, 2023; Ong et al., 2025); if the chosen model's call fails, a fallback model is tried once.</p>
+<p>Three further layers complete the gateway. An <i>output guard</i> scans every answer, including one served from the cache, for four kinds of content an answer should almost never carry to an application that trusts it: browser script, destructive Structured Query Language (SQL) statements, dangerous shell commands, and strings shaped like secret keys. It can be off, flag the answer in a response header, or block it; a blocked answer is never written to the cache. Because it inspects the answer rather than the question, it is a second line of defence behind the cache that does not depend on the input filter. A <i>rate limiter</i> enforces per-caller requests per minute (counting cache hits) and a daily model-token budget, with counters in Redis so that a restart does not reset them. A <i>model picker</i> scores each miss with plain rules (code, mathematics, reasoning words, length, multiple questions) and sends easy prompts to a cheap model and hard ones to a strong model, in the spirit of cost-aware routing (Chen, Zaharia, &amp; Zou, 2023; Ong et al., 2025); if the chosen model's call fails, a fallback model is tried once.</p>
 
 <h3>4.4 One code base, one switch per layer</h3>
 <p>The vulnerable baseline and every defended configuration are the same program; each layer is a single environment variable, read once at start-up and copied into every log line. This removes a common confound, since no two arms can differ in some unintended way, and it makes every comparison in Section 6 a matter of changing flags. An automated test checks that every setting the code reads is actually passed into the container, after one such omission silently disabled a layer during development. The test suite ({{n_tests}} tests) runs without network access, model downloads or API keys, and a pinned linter reports no problems.</p>
@@ -184,37 +184,37 @@ sub, sup { line-height: 0; }
 <h2>5. Experimental Method</h2>
 
 <h3>5.1 Attack corpus</h3>
-<p>Seed attacks come from two public datasets on Hugging Face (Table 2): every English attack between 20 and 400 characters in <span class="mono">deepset/prompt-injections</span> (deepset, 2023; {{n_seeds_deepset}} seeds) and a seeded random sample of {{n_seeds_jay}} attacks from <span class="mono">jayavibhav/prompt-injection</span> (jayavibhav, 2024), {{n_seeds}} seeds in all. German-language deepset items are excluded, since the filter is trained for English only (<span class="nh">ProtectAI.com</span>, 2024). Each seed is reworded in two families that are kept apart throughout, because they behave very differently. <i>Lazy edits</i> are fixed rules an attacker can apply for free: flipping the case of the first letter, adding or removing a full stop, adding an exclamation mark, "please" at the start or end, a double space, all capitals, one typo, and stripped punctuation ({{n_lazy}} variants). <i>Full paraphrases</i> are produced by a T5 paraphraser (Vorobev &amp; Kuznetsov, 2023) with deterministic beam search (three per seed, {{n_rewrite}} variants). One further "exact" variant, the seed itself, must always hit and serves as a wiring check rather than a result. A separate set of {{n_controls}} honest questions from the same source is used as controls. All inputs are generated by a committed script with a fixed random seed and recorded with file hashes.</p>
+<p>Seed attacks come from two public datasets on Hugging Face: every English attack between 20 and 400 characters in <span class="mono">deepset/prompt-injections</span> (deepset, 2023; {{n_seeds_deepset}} seeds) and a seeded random sample of {{n_seeds_jay}} attacks from <span class="mono">jayavibhav/prompt-injection</span> (jayavibhav, 2024), {{n_seeds}} seeds in all. German-language deepset items are excluded, since the filter is trained for English only (<span class="nh">ProtectAI.com</span>, 2024). Each seed is reworded in two families that are kept apart throughout, because they behave very differently. <i>Lazy edits</i> are fixed rules an attacker can apply for free: flipping the case of the first letter, adding or removing a full stop, adding an exclamation mark, "please" at the start or end, a double space, all capitals, one typo, and stripped punctuation ({{n_lazy}} variants). <i>Full paraphrases</i> are produced by a T5 paraphraser (Vorobev &amp; Kuznetsov, 2023) with deterministic beam search (three per seed, {{n_rewrite}} variants). One further "exact" variant, the seed itself, must always hit and serves as a wiring check rather than a result. A separate set of {{n_controls}} honest questions from the same source is used as controls. All inputs are generated by a committed script with a fixed random seed and recorded with file hashes. Table 2 lists every data set, its source and size, and the experiments that use it. The sets used to test the filter alone share no text with the attack seeds, and the filter was tuned on none of them.</p>
 
 <div class="tbl span">
-<div class="cap"><b>Table 2</b> <i>Data used in the experiments. All sets are drawn deterministically with fixed seeds. The E4 sets share no text with the attack seeds; the filter is used off the shelf and was tuned on none of them.</i></div>
+<div class="cap"><b>Table 2</b> <i>Data sets used in the experiments.</i></div>
 {{data_table}}
 </div>
 
 <h3>5.2 Procedure</h3>
-<p>Fig. 2 shows the harness. For each seed, the cache is cleared and one poisoned entry is planted under the seed text through a test-only endpoint that is disabled unless explicitly enabled. Every variant of that seed is then sent to the gateway over HTTP, and each reply is joined to the gateway's own log line for that request through a request identifier the gateway returns. The poison is a fixed marker string carrying a leaked "system prompt" and a fake API key. The 100 controls are each sent against a freshly poisoned cache to check that honest users are never served the poison. To measure what a defence costs honest users, each control is asked once (a miss, which stores its answer) and then reworded with the same lazy edits; the share of those rewordings answered from the cache is the honest hit rate.</p>
+<p>Fig. 2 shows the measurement harness. Inputs are generated once; each experiment arm then restarts the gateway with its own settings and repeats the same procedure. For each seed, the cache is cleared and one poisoned entry is planted under the seed text through a test-only endpoint that is disabled unless explicitly enabled. Every variant of that seed is then sent to the gateway over HTTP, and each reply is joined to the gateway's own log line for that request through a request identifier the gateway returns. The poison is a fixed marker string carrying a leaked "system prompt" and a fake API key. The 100 controls are each sent against a freshly poisoned cache to check that honest users are never served the poison. To measure what a defence costs honest users, each control is asked once (a miss, which stores its answer) and then reworded with the same lazy edits; the share of those rewordings answered from the cache is the honest hit rate.</p>
 
 <figure class="span">
 {{svg_harness}}
-<figcaption><b>Fig. 2.</b> <i>The measurement harness. Inputs are generated once and committed. Each experiment arm is a gateway restart with different flags; the runner plants one poisoned entry per seed, fires every variant, and joins each reply to the gateway's log line, which records independently whether the filter ran.</i></figcaption>
+<figcaption><b>Fig. 2.</b> <i>Measurement harness.</i></figcaption>
 </figure>
 
 <h3>5.3 Measures</h3>
 <p>A <i>bypass</i> is counted only when two independent facts agree: the reply body is exactly the poison string, and the gateway's log line for that request records that screening did not run. The second condition reads the claim from the system under test rather than from our harness. <i>Poison served</i> counts replies equal to the poison whether or not the filter ran. Because the filter itself misses some attacks, poison served mixes two causes. We therefore ask the same filter about every variant directly, in the filter-first order, and split each served poison into <i>cache-caused</i> (the filter blocks that exact text when asked, so the cache is why it got through) and <i>filter miss</i> (the filter lets it through anyway, so no cache defence can stop it). Only the cache-caused share measures a cache defence. We also report the honest hit rate, the median latency of honest hits and misses, the false-alarm rate of the filter on honest text, and its detection rate on attacks.</p>
 
 <h3>5.4 Experiments</h3>
-<p>Table 3 lists the five experiments. E1 to E4 use the real filter, embedder and stores; E5 uses real, paid model calls. Section 6.6 adds two live demonstrations of the remaining mitigation layers.</p>
+<p>Table 3 lists the five experiments, E1 to E5, with the question each answers and its scale. E1 to E4 use the real filter, embedder and stores with the model reply mocked, since a cached answer never reaches the model; E5 uses real, paid model calls. Section 6.6 adds two live demonstrations of the remaining mitigation layers.</p>
 
 <div class="tbl span">
-<div class="cap"><b>Table 3</b> <i>Experiments. All attack experiments use the real filter, embedder, Qdrant and Redis with the model reply mocked, since the attack concerns answers served from the cache, where the model is never called.</i></div>
+<div class="cap"><b>Table 3</b> <i>Experiments.</i></div>
 {{experiments_table}}
 </div>
 
 <h3>5.5 Statistical treatment</h3>
-<p>The rewordings of one seed are not independent: if one lazy edit of a seed matches the poisoned entry, the others usually do too. A binomial interval over variants would therefore be too narrow. Every rate over attack variants is reported with a 95% confidence interval from a cluster bootstrap that resamples whole seeds with replacement (2,000 resamples, fixed random seed; Efron &amp; Tibshirani, 1993; Field &amp; Welsh, 2007). When no event occurs at all, resampling can only return zero, so we report the conservative rule-of-three upper bound over seeds, 3/<i>n</i><sub>seeds</sub> (Hanley &amp; Lippman-Hand, 1983). Rates over independent texts, as in E4, use the Wilson score interval (Wilson, 1927).</p>
+<p>The rewordings of one seed are not independent: if one lazy edit of a seed matches the poisoned entry, the others usually do too. A binomial interval over variants would therefore be too narrow. Every rate over attack variants is reported with a 95% confidence interval (CI) from a cluster bootstrap that resamples whole seeds with replacement (2,000 resamples, fixed random seed; Efron &amp; Tibshirani, 1993; Field &amp; Welsh, 2007). When no event occurs at all, resampling can only return zero, so we report the conservative rule-of-three upper bound over seeds, 3/<i>n</i><sub>seeds</sub> (Hanley &amp; Lippman-Hand, 1983). Rates over independent texts, as in E4, use the Wilson score interval (Wilson, 1927).</p>
 
 <h3>5.6 Environment and reproducibility</h3>
-<p>All runs used one Apple M5 laptop ({{hw_cores}} cores, {{hw_mem_gb}} GB memory) with Docker Desktop limited to {{docker_cpus}} CPUs and {{docker_mem_gb}} GB, models on CPU only (PyTorch {{torch_version}}, sentence-transformers {{st_version}}, Qdrant {{qdrant_version}}). Every experiment has a committed script; every table and figure in this paper is produced by committed scripts that read only the request logs and result files, and the paper's PDF is built from a source in which every number is a token filled from those files. Recorded model replies make every run repeatable without an API key or cost.</p>
+<p>All runs used one Apple M5 laptop ({{hw_cores}} cores, {{hw_mem_gb}} GB memory) with Docker Desktop limited to {{docker_cpus}} central processing units (CPUs) and {{docker_mem_gb}} GB, models on CPU only (PyTorch {{torch_version}}, sentence-transformers {{st_version}}, Qdrant {{qdrant_version}}). Every experiment has a committed script; every table and figure in this paper is produced by committed scripts that read only the request logs and result files, and this paper is built from a source in which every number is a token filled from those files. Recorded model replies make every run repeatable without an API key or cost.</p>
 
 {{results_and_rest}}
 

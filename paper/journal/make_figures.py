@@ -70,6 +70,8 @@ def style(ax, grid_axis: str = "y") -> None:
 def save(fig, name: str) -> None:
     OUT.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT / f"{name}.svg", bbox_inches="tight", pad_inches=0.03)
+    # PNG copy for the Word version of the paper (Word cannot embed this SVG).
+    fig.savefig(OUT / f"{name}.png", bbox_inches="tight", pad_inches=0.03, dpi=300)
     plt.close(fig)
     print(f"  wrote {OUT / name}.svg")
 
