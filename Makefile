@@ -137,8 +137,9 @@ journal: phase4-report journal-figures  ## Build the journal paper PDF (paper/jo
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-gateway python -m pytest --collect-only -q | tail -1 > paper/journal/build/tests.txt
 	python3 paper/journal/build.py
 
-journal-docx: journal  ## Build the Word version (paper/journal/SentryGate-journal.docx); needs python-docx
+journal-docx: journal  ## Build the Word files: two-column (SentryGate-journal.docx) and single-column manuscript (SentryGate-manuscript.docx)
 	python3 paper/journal/build_docx.py
+	python3 paper/journal/build_docx_manuscript.py
 
 figures: attacks-build  ## Rebuild the table and chart from the results
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-attacks python -m eval.make_figures
