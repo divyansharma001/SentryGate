@@ -11,7 +11,7 @@ REDIS_HOST_PORT ?= 6380
 export REDIS_HOST_PORT
 
 .PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze \
-        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures journal-docx
+        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures journal-docx report4 report4-pptx deck-phase4
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -206,3 +206,18 @@ live-smoke:     ## One real call through the gateway (needs env key, never store
 	@sleep 6
 	@curl -fsS -D /tmp/sg-live-headers.txt $(GATEWAY)/v1/chat/completions -H 'content-type: application/json' -d '{"model":"'"$${LIVE_MODEL:-openai/gpt-4o-mini}"'","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}' | python3 -m json.tool
 	@grep -i x-sentrygate /tmp/sg-live-headers.txt
+
+report4:        ## Build Progress Report-4, final (reports/out/Progress4.docx + .pdf) in the college format
+	python3 reports/build_progress4.py
+	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
+	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office Progress4.docx
+	@echo "wrote reports/out/Progress4.pdf"
+
+report4-pptx:   ## Build the final review deck (reports/out/SentryGate_Progress_Report_4.pptx + .pdf)
+	@node -e "require('pptxgenjs')" 2>/dev/null || npm install --no-save pptxgenjs@3.12.0
+	node reports/build_progress4_pptx.js
+	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
+	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office SentryGate_Progress_Report_4.pptx
+
+deck-phase4:    ## Rebuild docs/deck-phase4.html, the animated final-review slides
+	python3 docs/build_deck_phase4.py
