@@ -22,8 +22,9 @@ from pathlib import Path
 
 from report_common import (
     GREEN, ORANGE, RED, ROOT, bullet, caption, figure, heading, new_report, page_break,
-    para, pct, save, table,
+    para, pct, save, table_minimal as table,
 )
+import subprocess
 
 W4 = json.loads((ROOT / "data/week4/report.json").read_text())
 P3 = json.loads((ROOT / "data/phase3/report.json").read_text())
@@ -47,6 +48,24 @@ def references() -> int:
     """Count of references in the journal paper, read from its source."""
     text = (ROOT / "paper/journal/parts/back_matter.html").read_text()
     return len(re.findall(r"<p>", text.split("<h2>References</h2>", 1)[1]))
+
+
+def architecture_png() -> Path:
+    """The paper's architecture diagram (paper/journal/diagrams/architecture.svg), as a PNG for Word."""
+    svg = (ROOT / "paper/journal/diagrams/architecture.svg").read_text()
+    m = re.search(r'viewBox="0 0 (\d+) (\d+)"', svg)
+    w, h = int(m.group(1)), int(m.group(2))
+    out_dir = ROOT / "reports/out"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    page = out_dir / "architecture.html"
+    page.write_text(f'<!doctype html><body style="margin:0;background:#fff">'
+                    f'{svg.replace("<svg ", f"<svg width={w} height={h} ", 1)}</body>')
+    png = out_dir / "architecture-final.png"
+    chrome = "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+    subprocess.run([chrome, "--headless=new", "--disable-gpu", "--hide-scrollbars", "--force-device-scale-factor=3",
+                    f"--window-size={w},{h}", f"--screenshot={png}", page.as_uri()], check=True, capture_output=True)
+    page.unlink()
+    return png
 
 
 def build() -> Path:
@@ -236,12 +255,11 @@ def build() -> Path:
            "evaluated on questions it was not tuned on, in place of the rule-based one.")
 
     # ---- 5. architecture -------------------------------------------------
-    page_break(doc)
     heading(doc, "5.  Final System Architecture")
     para(doc, "Figure 4 shows the final gateway. **The cache is consulted first, for speed, but a hit needs a "
               "matching safety label and passes a fresh safety check before it is served.** Every answer passes "
               "the output guard, and a rate limit sits in front of everything.")
-    figure(doc, ROOT / "reports/assets/architecture-phase3.png", 5.3)
+    figure(doc, architecture_png(), 6.4)
     caption(doc, "Figure 4 - SentryGate, final system.")
     para(doc, "**Reading the diagram:** a request passes Nginx and the rate limit, then reaches the cache, which "
               "only returns stored answers whose safety label matches the question. On a hit, the safety check "

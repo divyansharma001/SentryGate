@@ -141,6 +141,71 @@ def table(doc, header: list[str], rows: list[list], widths: list[float], center_
     return t
 
 
+def table_minimal(doc, header: list[str], rows: list[list], widths: list[float], center_cols=(), bold_row=None):
+    """Journal-style table: a rule above and below, a thin rule under the header,
+    no shading, no vertical lines, no coloured text. Coloured cells passed as
+    (text, colour) are written in plain black."""
+    t = doc.add_table(rows=1 + len(rows), cols=len(header))
+    t.alignment = WD_TABLE_ALIGNMENT.CENTER
+    for i, h in enumerate(header):
+        p = t.rows[0].cells[i].paragraphs[0]
+        p.alignment = WD_ALIGN_PARAGRAPH.CENTER if i in center_cols else WD_ALIGN_PARAGRAPH.LEFT
+        set_font(p.add_run(h), size=10.5)
+    for r, row in enumerate(rows, start=1):
+        for i, val in enumerate(row):
+            p = t.rows[r].cells[i].paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER if i in center_cols else WD_ALIGN_PARAGRAPH.LEFT
+            text = val[0] if isinstance(val, tuple) else str(val)
+            set_font(p.add_run(text), size=10.5, bold=(bold_row == r - 1))
+    t.autofit = False
+    for i, w in enumerate(widths):
+        t.columns[i].width = Inches(w)
+    for row in t.rows:
+        for i, w in enumerate(widths):
+            row.cells[i].width = Inches(w)
+    tbl_pr = t._element.tblPr
+    borders = OxmlElement("w:tblBorders")
+    for edge, size in (("top", "12"), ("left", None), ("bottom", "12"), ("right", None),
+                       ("insideH", None), ("insideV", None)):
+        el = OxmlElement(f"w:{edge}")
+        if size:
+            el.set(qn("w:val"), "single")
+            el.set(qn("w:sz"), size)
+            el.set(qn("w:color"), "000000")
+        else:
+            el.set(qn("w:val"), "nil")
+        borders.append(el)
+    tbl_pr.append(borders)
+    margins = OxmlElement("w:tblCellMar")
+    for edge, v in (("top", 40), ("bottom", 40), ("left", 90), ("right", 90)):
+        el = OxmlElement(f"w:{edge}")
+        el.set(qn("w:w"), str(v))
+        el.set(qn("w:type"), "dxa")
+        margins.append(el)
+    tbl_pr.append(margins)
+    for r, row in enumerate(t.rows):
+        tr_pr = row._tr.get_or_add_trPr()
+        tr_pr.append(OxmlElement("w:cantSplit"))
+        for cell in row.cells:
+            tc_pr = cell._element.get_or_add_tcPr()
+            if r == 0:
+                b = OxmlElement("w:tcBorders")
+                el = OxmlElement("w:bottom")
+                el.set(qn("w:val"), "single")
+                el.set(qn("w:sz"), "6")
+                el.set(qn("w:color"), "000000")
+                b.append(el)
+                tc_pr.append(b)
+            v = OxmlElement("w:vAlign")
+            v.set(qn("w:val"), "center")
+            tc_pr.append(v)
+            for p in cell.paragraphs:
+                p.paragraph_format.space_after = Pt(0)
+                p.paragraph_format.line_spacing = 1.0
+                p.paragraph_format.keep_with_next = True
+    return t
+
+
 def style_table(t):
     """Report-1 look: light grey borders, padded cells, centred vertically,
     and the table kept on one page with its header."""
