@@ -11,7 +11,7 @@ REDIS_HOST_PORT ?= 6380
 export REDIS_HOST_PORT
 
 .PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze \
-        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures journal-docx report4 report4-pptx deck-phase4
+        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures journal-docx journal-manuscript report4 report4-pptx deck-phase4
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -221,3 +221,7 @@ report4-pptx:   ## Build the final review deck (reports/out/SentryGate_Progress_
 
 deck-phase4:    ## Rebuild docs/deck-phase4.html, the animated final-review slides
 	python3 docs/build_deck_phase4.py
+
+journal-manuscript:  ## Build the single-column, numbered-citation manuscript (needs manuscript/front.json)
+	python3 paper/journal/build.py --html
+	python3 paper/journal/manuscript/build.py

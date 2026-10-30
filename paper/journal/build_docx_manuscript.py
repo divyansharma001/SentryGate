@@ -492,7 +492,9 @@ class Converter:
             texts = [r[i].text().strip() for r in cells if i < len(r)]
             floor = max((len(t) if not any(ch.isalpha() for ch in t) else len(w)
                          for t in texts for w in (t.split() or [""])), default=1)
-            return max(len(t) for t in texts) + 2, floor + 2
+            full = max(len(t) for t in texts) + 2
+            # Room for the widest word plus cell margins, and long text gets at most about two lines.
+            return full, max(floor + 4, full // 2)
 
         sizes = [natural(i) for i in range(ncol)]
         weights = [full for full, _ in sizes]
@@ -506,6 +508,9 @@ class Converter:
         total = sum(weights)
         widths = [int(width * w / total) for w in weights]
         widths[-1] = width - sum(widths[:-1])
+        fixed = self.fixed_widths(n)
+        if fixed:
+            widths = fixed
 
         t = doc.add_table(rows=len(cells), cols=ncol)
         t.alignment = WD_TABLE_ALIGNMENT.CENTER
@@ -543,6 +548,10 @@ class Converter:
                 trpr.append(OxmlElement("w:tblHeader"))   # repeat the header on a new page
         spacer = self.para(indent=False)
         spacer.paragraph_format.space_after = Pt(6)
+
+    def fixed_widths(self, n: Node) -> list[int] | None:
+        """Hand-set column widths for a table, in EMU; None sizes it from its text."""
+        return None
 
     # --- figures ---
     def figure(self, n: Node, wide: bool) -> None:

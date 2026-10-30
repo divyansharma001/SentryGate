@@ -33,3 +33,6 @@ reports/out/
 reports/team.json
 data/demo/
 paper/journal/build/
+# The submission manuscript holds the authors' emails; the repository is public.
+paper/journal/manuscript/front.json
+paper/journal/manuscript/Manuscript.docx
