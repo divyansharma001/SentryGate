@@ -10,8 +10,10 @@ GATEWAY := http://127.0.0.1:8080
 REDIS_HOST_PORT ?= 6380
 export REDIS_HOST_PORT
 
-.PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast capture diagram deck present freeze \
-        gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo paper-pdf variants bypass figures eval deck-phase2 deck-phase2-pptx report report-pptx cache-reset live-smoke defence defence-figures lint report3 report3-pptx phase4 phase4-report journal journal-figures journal-docx journal-manuscript report4 report4-pptx deck-phase4
+.PHONY: docker-build docker-demo docker-demo-run docker-demo-fast phase2-up phase2-down demo demo-fast poc poc-fast \
+        capture gateway-build gateway-up gateway-down gateway-logs gateway-smoke gateway-test demo-up gateway-demo \
+        cache-reset attacks-build variants bypass lint defence defence-figures phase4 phase4-report \
+        journal-figures journal journal-docx journal-manuscript figures eval diagram freeze live-smoke
 
 docker-build:   ## Build the image (bakes both models in, ~2.2GB, takes a few min)
 	docker compose build poc
@@ -43,7 +45,7 @@ poc:            ## Same as demo but allowed to reach the network (first run)
 poc-fast:
 	$(PY) poc_bypass.py --fast
 
-capture:        ## Re-record the run the deck quotes from
+capture:        ## Re-record the Phase 1 run kept in docs/captures/demo-output.txt
 	HF_HUB_OFFLINE=1 $(PY) poc_bypass.py > docs/captures/demo-output.txt 2>&1
 	sed -i 's/\r$$//' docs/captures/demo-output.txt
 
@@ -98,10 +100,6 @@ gateway-test:   ## Run the test suite inside the image
 cache-reset:    ## Clean the cache between experiments (never by hand)
 	@curl -fsS -X POST $(GATEWAY)/v1/cache/clear | python3 -m json.tool
 
-
-paper-pdf:      ## Build paper/SentryGate-paper.pdf from paper/paper.md (needs Chrome + pip install markdown)
-	python3 paper/build_pdf.py
-
 # --- Phase 2 Week 4: reproduce the bypass -----------------------------------
 attacks-build:  ## Build the attack-tools image (datasets + charts, on the gateway image)
 	BUILD_SHA=$(BUILD_SHA) docker compose build gateway
@@ -115,7 +113,7 @@ bypass: attacks-build   ## Run the full sweep on the real gateway (the Phase 2 r
 
 lint:           ## Check the Python code with ruff (pinned, in a throwaway container)
 	docker run --rm -v $(CURDIR):/src -w /src python:3.11-slim sh -c \
-	  "pip install -q ruff==0.6.9 && ruff check --select E,F,W --line-length 120 app attacks eval tests reports"
+	  "pip install -q ruff==0.6.9 && ruff check --select E,F,W --line-length 120 app attacks eval tests"
 
 defence: attacks-build  ## Run the Phase 3 sweep: five defence arms, both poison labels, honest questions
 	bash attacks/sweep_phase3.sh
@@ -137,8 +135,7 @@ journal: phase4-report journal-figures  ## Build the journal paper PDF (paper/jo
 	docker run --rm -v $(CURDIR):/src -w /src sentrygate-gateway python -m pytest --collect-only -q | tail -1 > paper/journal/build/tests.txt
 	python3 paper/journal/build.py
 
-journal-docx: journal  ## Build the Word files: two-column (SentryGate-journal.docx) and single-column manuscript (SentryGate-manuscript.docx)
-	python3 paper/journal/build_docx.py
+journal-docx: journal  ## Build the Word manuscript (paper/journal/SentryGate-manuscript.docx)
 	python3 paper/journal/build_docx_manuscript.py
 
 figures: attacks-build  ## Rebuild the table and chart from the results
@@ -151,51 +148,8 @@ eval: attacks-build     ## Regenerate every figure from the logs (bypass + laten
 
 MMD = problem flow architecture architecture-current architecture-phase3
 
-diagram:        ## every mermaid source -> png, light for print + dark for the deck
-	@for d in $(MMD); do 	  npx -y @mermaid-js/mermaid-cli@11 -i docs/$$d.mmd -o docs/$$d.png -b white -w 1800; 	  npx -y @mermaid-js/mermaid-cli@11 -i docs/$$d.mmd -o docs/captures/$$d-dark.png -t dark -b transparent -w 2000 -s 2; 	done
-	@# the report is portrait: the same Phase 3 diagram, drawn top to bottom
-	sed 's/^flowchart LR$$/flowchart TB/' docs/architecture-phase3.mmd > reports/assets/.architecture-phase3-tb.mmd
-	npx -y @mermaid-js/mermaid-cli@11 -i reports/assets/.architecture-phase3-tb.mmd -o reports/assets/architecture-phase3.png -b white -w 1400
-	rm -f reports/assets/.architecture-phase3-tb.mmd
-
-deck:           ## Rebuild docs/deck.html from the template + the captured run
-	$(PY) docs/build_deck.py
-
-deck-phase2:    ## Rebuild docs/deck-phase2.html from the Week 4/5 results
-	python3 docs/build_deck_phase2.py
-
-deck-phase2-pptx: ## Rebuild the editable PowerPoint (docs/deck-phase2.pptx)
-	@node -e "require('pptxgenjs')" 2>/dev/null || npm install --no-save pptxgenjs
-	node docs/build_deck_phase2_pptx.js
-
-report:         ## Build Progress Report-2 (reports/out/Progress2.docx + .pdf) in the college format
-	python3 reports/build_progress2.py
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office Progress2.docx
-	@echo "wrote reports/out/Progress2.pdf"
-
-report3:        ## Build Progress Report-3 (reports/out/Progress3.docx + .pdf) in the college format
-	python3 reports/build_progress3.py
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office Progress3.docx
-	@echo "wrote reports/out/Progress3.pdf"
-
-report-pptx:    ## Build the Progress Report 2 deck (reports/out/SentryGate_Progress_Report_2.pptx + .pdf)
-	@node -e "require('pptxgenjs')" 2>/dev/null || npm install --no-save pptxgenjs
-	node reports/build_progress2_pptx.js
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office SentryGate_Progress_Report_2.pptx
-
-report3-pptx:   ## Build the Progress Report 3 deck for the 24 Oct review (reports/out/SentryGate_Progress_Report_3.pptx + .pdf)
-	@node -e "require('pptxgenjs')" 2>/dev/null || npm install --no-save pptxgenjs@3.12.0
-	node reports/build_progress3_pptx.js
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office SentryGate_Progress_Report_3.pptx
-
-present:        ## Serve the decks at http://127.0.0.1:8777 (Phase 1: deck.html, Phase 2: deck-phase2.html)
-	@echo "Phase 1 deck: http://127.0.0.1:8777/deck.html"
-	@echo "Phase 2 deck: http://127.0.0.1:8777/deck-phase2.html   (Ctrl-C to stop)"
-	cd docs && python3 -m http.server 8777 --bind 127.0.0.1
+diagram:        ## Redraw every diagram in docs/ from its mermaid source
+	@for d in $(MMD); do npx -y @mermaid-js/mermaid-cli@11 -i docs/$$d.mmd -o docs/$$d.png -b white -w 1800; done
 
 freeze:
 	$(PY) -m pip freeze > requirements-lock.txt
@@ -207,21 +161,9 @@ live-smoke:     ## One real call through the gateway (needs env key, never store
 	@curl -fsS -D /tmp/sg-live-headers.txt $(GATEWAY)/v1/chat/completions -H 'content-type: application/json' -d '{"model":"'"$${LIVE_MODEL:-openai/gpt-4o-mini}"'","messages":[{"role":"user","content":"Reply with OK only"}],"max_tokens":5}' | python3 -m json.tool
 	@grep -i x-sentrygate /tmp/sg-live-headers.txt
 
-report4:        ## Build Progress Report-4, final (reports/out/Progress4.docx + .pdf) in the college format
-	python3 reports/build_progress4.py
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office Progress4.docx
-	@echo "wrote reports/out/Progress4.pdf"
-
-report4-pptx:   ## Build the final review deck (reports/out/SentryGate_Progress_Report_4.pptx + .pdf)
-	@node -e "require('pptxgenjs')" 2>/dev/null || npm install --no-save pptxgenjs@3.12.0
-	node reports/build_progress4_pptx.js
-	@docker image inspect sentrygate-office >/dev/null 2>&1 || docker build -q -f deploy/Dockerfile.office -t sentrygate-office .
-	docker run --rm -v $(CURDIR)/reports/out:/work sentrygate-office SentryGate_Progress_Report_4.pptx
-
-deck-phase4:    ## Rebuild docs/deck-phase4.html, the animated final-review slides
-	python3 docs/build_deck_phase4.py
-
 journal-manuscript:  ## Build the single-column, numbered-citation manuscript (needs manuscript/front.json)
 	python3 paper/journal/build.py --html
 	python3 paper/journal/manuscript/build.py
+
+# Local extras that are not part of the public repository.
+-include college.mk

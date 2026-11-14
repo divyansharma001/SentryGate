@@ -28,11 +28,30 @@ data/week5/
 .DS_Store
 node_modules/
 package-lock.json
-# Generated reports carry enrollment numbers; the repo is public.
-reports/out/
-reports/team.json
 data/demo/
 paper/journal/build/
 # The submission manuscript holds the authors' emails; the repository is public.
 paper/journal/manuscript/front.json
 paper/journal/manuscript/Manuscript.docx
+paper/journal/Cover letter.docx
+
+# College material (progress reports, decks, plans, the first draft of the paper).
+# Kept on the authors' machines; the public repository holds only what the paper needs.
+reports/
+college.mk
+specs/
+docs/deck*.html
+docs/deck-phase2.pptx
+docs/build_deck*
+docs/guide.html
+docs/PRESENTING.md
+docs/report-architecture.mmd
+docs/captures/*-dark.png
+paper/paper.md
+paper/SentryGate-paper.pdf
+paper/build_pdf.py
+paper/lab-notebook.md
+paper/related-work.md
+paper/journal/SentryGate-journal.docx
+paper/journal/build_docx.py
+deploy/Dockerfile.office
